@@ -1,0 +1,52 @@
+<div class="terminal-container">
+  <div class="terminal-header">
+    <h2><i class="bi bi-upc-scan me-2"></i> Warehouse Hub Terminal</h2>
+    <p>Operational scanner interface for consolidating massive regional linehauls into Transit Bags.</p>
+  </div>
+
+  <div class="alert shadow-sm fade-in" [ngClass]="isError ? 'alert-danger' : 'alert-success'" *ngIf="statusMessage">
+    <i class="bi" [ngClass]="isError ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill'"></i>
+    {{ statusMessage }}
+  </div>
+
+  <div class="row gx-4 mt-4">
+    <!-- Left Panel: Scanner Inputs -->
+    <div class="col-lg-6 mb-4">
+      <div class="hub-panel">
+        <h4 class="mb-4 text-info"><i class="bi bi-box-seam me-2"></i> Consolidation Scanners</h4>
+        
+        <div class="form-group mb-4">
+          <label>Transit Bag Barcode (TB-XXX)</label>
+          <input type="text" class="form-control scanner-input" [(ngModel)]="bagBarcode" placeholder="Scan Bag..." autofocus>
+        </div>
+
+        <div class="action-grid mb-5">
+          <button class="btn btn-primary btn-lg shadow" (click)="openBag()"><i class="bi bi-unlock-fill"></i> Open</button>
+          <button class="btn btn-warning btn-lg shadow" (click)="sealBag()"><i class="bi bi-lock-fill"></i> Seal</button>
+          <button class="btn btn-success btn-lg receive-btn shadow" (click)="receiveBag()"><i class="bi bi-box-arrow-in-down"></i> Receive Linehaul</button>
+        </div>
+
+        <div class="form-group mb-3">
+          <label>Shipment Tracking Barcode (TRK-XXX)</label>
+          <div class="input-group">
+            <input type="text" class="form-control scanner-input" [(ngModel)]="shipmentBarcode" placeholder="Scan Shipment...">
+            <button class="btn btn-info px-4 fw-bold shadow" (click)="scanShipment()"><i class="bi bi-upc"></i> FLUSH</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel: Logs -->
+    <div class="col-lg-6">
+      <div class="log-panel">
+        <h4 class="mb-3 text-secondary"><i class="bi bi-terminal me-2"></i> Activity Log</h4>
+        <div class="log-window shadow-inner">
+          <div *ngIf="terminalLog.length === 0" class="text-muted text-center mt-5 position-relative top-50 translate-middle-y">Awaiting Barcode Pulses...</div>
+          <div *ngFor="let entry of terminalLog" class="log-entry font-monospace small fade-in">
+            <span [ngClass]="entry.includes('ERROR') ? 'text-danger' : 'text-success'">{{ entry }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

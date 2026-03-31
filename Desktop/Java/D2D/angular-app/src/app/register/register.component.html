@@ -1,0 +1,175 @@
+<div class="d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 150px);">
+
+  <!-- Toast Notification -->
+  <div *ngIf="showToast" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+    <div class="toast show align-items-center text-white border-0" [class.bg-success]="toastType === 'success'"
+      [class.bg-danger]="toastType === 'error'" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          {{ toastMessage }}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="showToast = false"
+          aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row w-100 bg-white shadow-lg rounded overflow-hidden" style="max-width: 1000px;">
+
+    <!-- Image Side (Right side for Register) -->
+    <div class="col-md-6 p-0 relative d-none d-md-block order-2">
+      <div class="h-100 w-100 image-side d-flex flex-column justify-content-center p-4 text-white">
+        <div class="overlay"></div>
+        <!-- <div class="content position-relative z-1">
+                    <h1 class="display-3 fw-bold">Hello<br>World.</h1>
+                    <p class="mt-3 lead">Lorem ipsum dolor sit amet, consectetur adipiscing elit sed eget aliquet.</p>
+                    <p class="mt-5 fs-4">601 X 864</p>
+                </div> -->
+      </div>
+    </div>
+
+    <!-- Form Side (Left side for Register) -->
+    <div class="col-md-6 p-4 d-flex flex-column justify-content-center order-1">
+
+      <!-- Register Form -->
+      <div>
+        <h2 class="fw-bold mb-4">Register</h2>
+        <p class="text-muted mb-4">Already have an account? <a routerLink="/login"
+            class="text-info text-decoration-none">Login</a></p>
+
+        <form [formGroup]="registerForm">
+
+          <ng-container *ngIf="otpStep === 'form'">
+            <div class="mb-3">
+              <label class="form-label text-uppercase text-muted small fw-bold">Name</label>
+              <input type="text" class="form-control border-0 border-bottom rounded-0 ps-0" formControlName="name">
+              <div *ngIf="r['name'].touched && r['name'].errors" class="text-danger small mt-1">
+                <span *ngIf="r['name'].errors['required']">Name is required</span>
+                <span *ngIf="r['name'].errors['pattern']">Name must only contain characters and spaces</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label text-uppercase text-muted small fw-bold">Email ID</label>
+              <input type="email" class="form-control border-0 border-bottom rounded-0 ps-0" formControlName="email">
+              <div *ngIf="r['email'].touched && r['email'].errors" class="text-danger small mt-1">
+                <span *ngIf="r['email'].errors['required']">Email is required</span>
+                <span *ngIf="r['email'].errors['email']">Invalid email format</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label text-uppercase text-muted small fw-bold">Role</label>
+              <select class="form-select border-0 border-bottom rounded-0 ps-0" formControlName="role">
+                <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+              </select>
+              <div *ngIf="r['role'].touched && r['role'].errors" class="text-danger small mt-1">
+                <span *ngIf="r['role'].errors['required']">Role is required</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label text-uppercase text-muted small fw-bold">Phone No</label>
+              <div class="d-flex">
+                <span class="border-bottom py-2 me-2 text-muted">+1</span>
+                <input type="tel" class="form-control border-0 border-bottom rounded-0 ps-0" formControlName="phone">
+              </div>
+              <div *ngIf="r['phone'].touched && r['phone'].errors" class="text-danger small mt-1">
+                <span *ngIf="r['phone'].errors['required']">Phone is required</span>
+                <span *ngIf="r['phone'].errors['pattern']">Phone must only contain numbers</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label text-uppercase text-muted small fw-bold">Password</label>
+              <div class="input-group border-bottom">
+                <input [type]="showRegisterPassword ? 'text' : 'password'" class="form-control border-0 rounded-0 ps-0"
+                  placeholder="••••••••" formControlName="password" style="box-shadow: none;">
+                <span class="input-group-text bg-white border-0" style="cursor: pointer;"
+                  (click)="showRegisterPassword = !showRegisterPassword">
+                  <i class="bi" [class.bi-eye]="!showRegisterPassword" [class.bi-eye-slash]="showRegisterPassword"></i>
+                </span>
+              </div>
+              <div *ngIf="passwordStrength" class="small mt-1 fw-bold" [ngClass]="passwordStrengthClass">
+                Strength: {{passwordStrength}}
+              </div>
+              <div *ngIf="r['password'].touched && r['password'].errors" class="text-danger small mt-1">
+                <div *ngIf="r['password'].errors['required']">Password is required</div>
+                <div *ngIf="r['password'].errors['minlength']">Must be at least 12 characters</div>
+                <div *ngIf="r['password'].errors['passwordCompromised']">
+                  Must contain 1 Capital, 1 Small, 1 Number, 1 Special
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label text-uppercase text-muted small fw-bold">Confirm Password</label>
+              <div class="input-group border-bottom">
+                <input [type]="showRegisterPassword ? 'text' : 'password'" class="form-control border-0 rounded-0 ps-0"
+                  placeholder="••••••••" formControlName="confirmPassword" style="box-shadow: none;">
+              </div>
+              <div *ngIf="r['confirmPassword'].touched" class="text-danger small mt-1">
+                <div *ngIf="r['confirmPassword'].errors?.['required']">Confirm Password is required</div>
+                <div *ngIf="registerForm.errors?.['mismatch']">Passwords do not match</div>
+              </div>
+            </div>
+
+            <div class="mb-3 form-check">
+              <input type="checkbox" class="form-check-input" id="regCheck" formControlName="terms">
+              <label class="form-check-label text-muted small" for="regCheck">I accept terms and conditions & privacy
+                policy</label>
+            </div>
+
+            <div class="d-grid mb-3">
+              <button type="button" class="btn btn-danger rounded-pill py-2 fw-bold text-uppercase shadow-sm"
+                style="background-color: #ff3366; border: none;" [disabled]="registerForm.invalid || otpLoading"
+                (click)="sendOtpAndProceed()">
+                <span *ngIf="otpLoading" class="spinner-border spinner-border-sm me-2"></span>
+                Send OTP
+              </button>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="otpStep === 'verify'">
+            <div class="mb-3">
+              <p class="text-muted">An OTP has been sent to <strong>{{ registerForm.value.email }}</strong></p>
+              <label class="form-label text-uppercase text-muted small fw-bold text-primary">Enter 6-Digit Verification
+                Code</label>
+              <input type="text"
+                class="form-control border-0 border-bottom border-primary rounded-0 ps-0 fs-4 tracking-widest"
+                [(ngModel)]="otpCode" [ngModelOptions]="{standalone: true}" maxlength="6" placeholder="000000"
+                style="letter-spacing: 0.5rem; text-align: center;">
+            </div>
+
+            <div class="d-grid mb-3">
+              <button type="button" class="btn btn-primary rounded-pill py-2 fw-bold text-uppercase shadow-sm"
+                [disabled]="otpCode.length < 6 || otpLoading" (click)="verifyOtpAndRegister()">
+                <span *ngIf="otpLoading" class="spinner-border spinner-border-sm me-2"></span>
+                Verify & Create Account
+              </button>
+              <button type="button" class="btn btn-link text-muted small mt-2" (click)="otpStep = 'form'"
+                [disabled]="otpLoading">
+                Go Back
+              </button>
+            </div>
+          </ng-container>
+
+        </form>
+      </div>
+
+      <!-- Social Media -->
+      <!-- <div class="text-center">
+        <p class="text-muted small mb-3">Login with social media</p>
+        <div class="d-flex justify-content-center gap-2">
+          <button class="btn btn-primary btn-sm px-3" style="background-color: #3b5998; border: none;"><i
+              class="bi bi-facebook"></i> Facebook</button>
+          <button class="btn btn-info btn-sm px-3 text-white" style="background-color: #1da1f2; border: none;"><i
+              class="bi bi-twitter"></i> Twitter</button>
+          <button class="btn btn-danger btn-sm px-3" style="background-color: #dd4b39; border: none;"><i
+              class="bi bi-google"></i> Google +</button>
+        </div>
+      </div> -->
+
+    </div>
+  </div>
+</div>

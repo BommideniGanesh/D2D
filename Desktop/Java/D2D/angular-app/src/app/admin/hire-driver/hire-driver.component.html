@@ -1,0 +1,153 @@
+<div class="min-vh-100" style="background: #f0f2f5;">
+
+  <!-- Toast -->
+  @if (showToast) {
+  <div class="toast-wrap">
+    <div class="toast show border-0 shadow-lg" [class.bg-success]="toastType === 'success'"
+      [class.bg-info]="toastType === 'info'" role="alert">
+      <div class="d-flex align-items-center text-white px-3 py-2 gap-2">
+        <span>{{ toastMessage }}</span>
+        <button class="btn-close btn-close-white ms-auto" (click)="showToast = false"></button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Page Header -->
+  <div class="header-gradient text-white py-4 px-4 mb-4">
+    <div class="container-fluid">
+      <div class="d-flex align-items-center gap-3">
+        <i class="bi bi-taxi-front fs-2"></i>
+        <div>
+          <h4 class="mb-0 fw-bold">Hire NYC Driver</h4>
+          <small class="opacity-75">Live data from NYC TLC For-Hire Vehicles Registry</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid px-4 pb-5">
+
+    <!-- Search & Controls -->
+    <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+      <div class="input-group search-bar shadow-sm">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0 border-end-0" placeholder="Search driver by name..."
+          [(ngModel)]="searchQuery" (keyup.enter)="onSearch()">
+        @if (searchQuery) {
+        <button class="btn btn-outline-secondary border-start-0" (click)="clearSearch()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+        }
+        <button class="btn btn-primary" (click)="onSearch()">Search</button>
+      </div>
+
+      <span class="page-badge ms-auto">
+        Page {{ currentPage + 1 }}
+      </span>
+    </div>
+
+    <!-- Error State -->
+    @if (error) {
+    <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      {{ error }}
+      <button class="btn btn-sm btn-outline-danger ms-auto" (click)="fetchDrivers()">Retry</button>
+    </div>
+    }
+
+    <!-- Loading State -->
+    @if (loading) {
+    <div class="d-flex justify-content-center align-items-center spinner-wrap">
+      <div class="text-center">
+        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
+        <div class="text-muted">Loading NYC driver data...</div>
+      </div>
+    </div>
+    }
+
+    <!-- Data Table -->
+    @if (!loading && !error) {
+    <div class="card border-0 shadow-sm driver-table-wrapper">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th class="ps-4">#</th>
+              <th>Driver Name</th>
+              <th>License #</th>
+              <th>License Type</th>
+              <th>Base / Company</th>
+              <th>Vehicle</th>
+              <th>Expiry Date</th>
+              <!-- <th class="text-center">Action</th> -->
+            </tr>
+          </thead>
+          <tbody>
+            @if (drivers.length === 0) {
+            <tr>
+              <td colspan="8">
+                <div class="text-center empty-state">
+                  <i class="bi bi-search fs-1 d-block mb-2"></i>
+                  No drivers found matching your search.
+                </div>
+              </td>
+            </tr>
+            }
+            @for (driver of drivers; track driver.vehicle_license_number; let i = $index) {
+            <tr>
+              <td class="ps-4 text-muted small">{{ currentPage * 25 + i + 1 }}</td>
+              <td>
+                <div class="fw-semibold">{{ formatName(driver.name) }}</div>
+              </td>
+              <td>
+                <span class="font-monospace small text-primary">{{ driver.vehicle_license_number }}</span>
+              </td>
+              <td>
+                <span class="badge badge-type {{ getLicenseBadgeClass(driver.license_type) }}">
+                  {{ driver.license_type || 'N/A' }}
+                </span>
+              </td>
+              <td class="small text-muted">{{ driver.base_name || '—' }}</td>
+              <td class="small">{{ driver.vehicle_model || driver.vehicle_year || '—' }}</td>
+              <td>
+                <span [class]="formatExpiry(driver.expiration_date).cls" class="small">
+                  <i class="bi bi-calendar3 me-1"></i>{{ formatExpiry(driver.expiration_date).text }}
+                </span>
+              </td>
+              <!-- <td class="text-center">
+                @if (!isHired(driver)) {
+                <button class="btn btn-sm btn-outline-success btn-hire fw-semibold" (click)="hireDriver(driver)">
+                  <i class="bi bi-person-plus-fill me-1"></i>Hire
+                </button>
+                } @else {
+                <span class="badge bg-success px-3 py-2">
+                  <i class="bi bi-check-circle-fill me-1"></i>Hired
+                </span>
+                }
+              </td> -->
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Footer -->
+      <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center py-3 px-4">
+        <button class="btn btn-outline-secondary btn-sm px-4" [disabled]="currentPage === 0 || loading"
+          (click)="prevPage()">
+          <i class="bi bi-chevron-left me-1"></i> Previous
+        </button>
+        <span class="text-muted small">
+          Showing {{ drivers.length }} driver{{ drivers.length !== 1 ? 's' : '' }} on page {{ currentPage + 1 }}
+        </span>
+        <button class="btn btn-outline-primary btn-sm px-4" [disabled]="!hasMore || loading" (click)="nextPage()">
+          Next <i class="bi bi-chevron-right ms-1"></i>
+        </button>
+      </div>
+    </div>
+    }
+  </div>
+</div>

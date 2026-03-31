@@ -1,0 +1,458 @@
+<div class="dashboard-container">
+
+  <!-- Header -->
+  <header class="dashboard-header mb-4">
+    <div class="d-flex justify-content-between align-items-end">
+      <div>
+        <h1 class="display-6 fw-bold text-dark mb-1">Driver Dashboard</h1>
+        <p class="text-muted mb-0">{{ today | date:'fullDate' }}</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Error Banner -->
+  <div *ngIf="errorMessage" class="alert alert-danger rounded-3">{{ errorMessage }}</div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="text-muted mt-3">Loading your dashboard...</p>
+  </div>
+
+  <div *ngIf="!loading">
+
+    <!-- Tab Stats Bar -->
+    <div class="tab-stats-bar mb-4 d-flex gap-3 flex-wrap">
+      <div class="stat-pill" [class.active]="activeTab === 'pending'" (click)="setTab('pending')">
+        <span class="pill-count bg-warning text-dark">{{ pendingOrders.length }}</span>
+        <span>Pending</span>
+        <i class="bi bi-arrow-clockwise small ms-1" *ngIf="assignmentLoading"></i>
+      </div>
+      <div class="stat-pill" [class.active]="activeTab === 'assigned'" (click)="setTab('assigned')">
+        <span class="pill-count bg-primary text-white">{{ assigned.length }}</span>
+        <span>Assigned</span>
+      </div>
+      <div class="stat-pill" [class.active]="activeTab === 'pickedup'" (click)="setTab('pickedup')">
+        <span class="pill-count bg-info text-dark">{{ pickedUp.length }}</span>
+        <span>Picked Up</span>
+      </div>
+      <div class="stat-pill" [class.active]="activeTab === 'delivered'" (click)="setTab('delivered')">
+        <span class="pill-count bg-success text-white">{{ delivered.length }}</span>
+        <span>Delivered</span>
+      </div>
+      <div class="stat-pill" [class.active]="activeTab === 'pod'" (click)="setTab('pod')">
+        <span class="pill-count bg-purple text-white">{{ deliveredWithPod.length }}</span>
+        <span>Delivered + PoD</span>
+      </div>
+      <div class="stat-pill" [class.active]="activeTab === 'rejected'" (click)="setTab('rejected')">
+        <span class="pill-count bg-danger text-white">{{ rejected.length + dismissedPendingOrders.length }}</span>
+        <span>Rejected</span>
+      </div>
+    </div>
+
+    <!-- ===== PENDING TAB ===== -->
+    <div *ngIf="activeTab === 'pending'">
+      <h5 class="fw-bold text-warning mb-3"><i class="bi bi-clock-history me-2"></i>Pending Orders (Available for Pickup)</h5>
+      <div *ngIf="pendingOrders.length === 0" class="empty-state text-center py-5 bg-white rounded-4 shadow-sm">
+        <i class="bi bi-inbox display-3 text-muted d-block mb-3"></i>
+        <p class="text-muted mb-0">No pending orders available right now.</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-lg-6 col-xl-4" *ngFor="let order of pendingOrders">
+          <div class="order-card card border-0 shadow-sm h-100 rounded-4 overflow-hidden">
+            <div class="card-header bg-warning bg-opacity-10 border-0 pt-3 px-4 pb-0 d-flex justify-content-between">
+              <div>
+                <span class="badge bg-warning text-dark rounded-pill px-3 py-2 mb-2">
+                  <i class="bi bi-clock-history me-1"></i> PENDING
+                </span>
+                <h6 class="fw-bold">#{{ order.trackingNumber }}</h6>
+              </div>
+              <small class="text-muted">{{ order.createdAt | date:'shortTime' }}</small>
+            </div>
+            <div class="card-body px-4 py-3">
+              <div class="timeline ps-3">
+                <div class="timeline-item pb-3 position-relative">
+                  <div class="timeline-dot bg-danger"></div>
+                  <strong class="text-danger small">Pickup</strong>
+                  <p class="mb-0 small fw-medium">{{ order.senderDetails?.firstName }} {{ order.senderDetails?.lastName }}</p>
+                  <small class="text-muted">{{ order.senderDetails?.addressLine1 }}, {{ order.senderDetails?.city }}</small>
+                </div>
+                <div class="timeline-item position-relative">
+                  <div class="timeline-dot bg-success"></div>
+                  <strong class="text-success small">Delivery</strong>
+                  <p class="mb-0 small fw-medium">{{ order.receiverDetails?.firstName }} {{ order.receiverDetails?.lastName }}</p>
+                  <small class="text-muted">{{ order.receiverDetails?.address?.addressLine1 }}</small>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer bg-white border-0 px-4 pb-4 d-flex flex-column gap-2">
+              <button class="btn btn-warning w-100 rounded-pill fw-medium"
+                (click)="pickupPendingOrder(order.id)">
+                <i class="bi bi-truck me-2"></i>Pickup This Order
+              </button>
+              <button class="btn btn-outline-danger w-100 rounded-pill fw-medium"
+                (click)="dismissPendingOrder(order.id)">
+                <i class="bi bi-x-circle me-2"></i>Not Interested
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ASSIGNED TAB ===== -->
+    <div *ngIf="activeTab === 'assigned'">
+      <h5 class="fw-bold text-primary mb-3"><i class="bi bi-box-seam me-2"></i>Assigned Orders (Ready to Act)</h5>
+      <div *ngIf="assigned.length === 0" class="empty-state text-center py-5 bg-white rounded-4 shadow-sm">
+        <i class="bi bi-inbox display-3 text-muted d-block mb-3"></i>
+        <p class="text-muted mb-0">No assigned orders at the moment.</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-lg-6 col-xl-4" *ngFor="let order of assigned">
+          <div class="order-card card border-0 shadow-sm h-100 rounded-4 overflow-hidden">
+            <div class="card-header bg-primary bg-opacity-10 border-0 pt-3 px-4 pb-0 d-flex justify-content-between align-items-start">
+              <div>
+                <span class="badge rounded-pill px-3 py-2 mb-2"
+                  [ngClass]="{'bg-success-subtle text-success': order.assignmentType === 'PICKUP', 'bg-info-subtle text-info': order.assignmentType === 'DELIVERY'}">
+                  <i class="bi" [ngClass]="{'bi-box-arrow-in-up': order.assignmentType === 'PICKUP', 'bi-box-arrow-in-down': order.assignmentType === 'DELIVERY'}"></i>
+                  {{ order.assignmentType }}
+                </span>
+                <h6 class="fw-bold">#{{ order.trackingNumber }}</h6>
+              </div>
+              <small class="text-muted">{{ order.assignedAt | date:'shortTime' }}</small>
+            </div>
+            <div class="card-body px-4 py-3">
+              <div class="timeline ps-3">
+                <div class="timeline-item pb-3 position-relative">
+                  <div class="timeline-dot bg-danger"></div>
+                  <strong class="text-danger small">Pickup</strong>
+                  <p class="mb-0 small fw-medium">{{ order.senderName }}</p>
+                  <small class="text-muted">{{ order.pickupAddress }}, {{ order.pickupCity }}</small>
+                </div>
+                <div class="timeline-item position-relative">
+                  <div class="timeline-dot bg-success"></div>
+                  <strong class="text-success small">Delivery</strong>
+                  <p class="mb-0 small fw-medium">{{ order.receiverName }}</p>
+                  <small class="text-muted">{{ order.deliveryAddress }}, {{ order.deliveryCity }}</small>
+                </div>
+              </div>
+              <div class="package-info bg-light rounded-3 p-2 mt-3 d-flex justify-content-between">
+                <div><span class="fw-bold">{{ order.weight }} kg</span><br><small class="text-muted">Weight</small></div>
+                <div><span class="fw-bold">{{ order.paymentMode }}</span><br><small class="text-muted">Payment</small></div>
+                <div><span class="fw-bold">{{ order.totalAmount | currency:'USD':'$' }}</span><br><small class="text-muted">Amount</small></div>
+              </div>
+            </div>
+            <div class="card-footer bg-white border-0 px-4 pb-4 d-flex flex-column gap-2">
+              <button *ngIf="order.assignmentType === 'PICKUP'" class="btn btn-primary rounded-pill fw-medium"
+                (click)="completePickup(order.assignmentId)">
+                <i class="bi bi-box-arrow-in-up me-2"></i>Complete Pickup
+              </button>
+              <button *ngIf="order.assignmentType === 'DELIVERY'" class="btn btn-success rounded-pill fw-medium"
+                (click)="openPodModal(order.assignmentId)">
+                <i class="bi bi-camera me-2"></i>Upload Proof of Delivery
+              </button>
+              <button class="btn btn-outline-danger rounded-pill fw-medium"
+                (click)="rejectAssignment(order.assignmentId)">
+                <i class="bi bi-x-circle me-2"></i>Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PICKED UP TAB ===== -->
+    <div *ngIf="activeTab === 'pickedup'">
+      <h5 class="fw-bold text-info mb-3"><i class="bi bi-truck me-2"></i>Picked Up (In Transit)</h5>
+      <div *ngIf="pickedUp.length === 0" class="empty-state text-center py-5 bg-white rounded-4 shadow-sm">
+        <i class="bi bi-inbox display-3 text-muted d-block mb-3"></i>
+        <p class="text-muted mb-0">No orders currently in transit.</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-lg-6 col-xl-4" *ngFor="let order of pickedUp">
+          <div class="order-card card border-0 shadow-sm h-100 rounded-4 overflow-hidden">
+            <div class="card-header bg-info bg-opacity-10 border-0 pt-3 px-4 pb-0 d-flex justify-content-between">
+              <div>
+                <span class="badge bg-info text-dark rounded-pill px-3 py-2 mb-2">
+                  <i class="bi bi-truck me-1"></i> IN TRANSIT
+                </span>
+                <h6 class="fw-bold">#{{ order.trackingNumber }}</h6>
+              </div>
+            </div>
+            <div class="card-body px-4 py-3">
+              <p class="mb-1 small fw-medium">From: {{ order.senderName }}</p>
+              <small class="text-muted d-block mb-3">{{ order.pickupAddress }}, {{ order.pickupCity }}</small>
+              <p class="mb-1 small fw-medium text-success">To: {{ order.receiverName }}</p>
+              <small class="text-muted">{{ order.deliveryAddress }}, {{ order.deliveryCity }}</small>
+            </div>
+            <div class="card-footer bg-white border-0 px-4 pb-4 d-flex flex-column gap-2">
+              <button class="btn btn-outline-primary rounded-pill w-100 fw-medium" (click)="openNavigation(order)">
+                <i class="bi bi-geo-alt-fill me-2"></i>Navigate Route
+              </button>
+              <button class="btn btn-success rounded-pill w-100 fw-medium" (click)="openPodModalForShipment(order.shipmentId)">
+                <i class="bi bi-camera me-2"></i>Upload PoD &amp; Deliver
+              </button>
+              <button class="btn btn-outline-secondary rounded-pill w-100 fw-medium" (click)="markAsDelivered(order.shipmentId)">
+                <i class="bi bi-box-arrow-down me-2"></i>Mark Delivered (No PoD)
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== DELIVERED TAB ===== -->
+    <div *ngIf="activeTab === 'delivered'">
+      <h5 class="fw-bold text-success mb-3"><i class="bi bi-check-circle me-2"></i>Delivered (No PoD yet)</h5>
+      <div *ngIf="delivered.length === 0" class="empty-state text-center py-5 bg-white rounded-4 shadow-sm">
+        <i class="bi bi-inbox display-3 text-muted d-block mb-3"></i>
+        <p class="text-muted mb-0">No delivered orders without PoD.</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-lg-6 col-xl-4" *ngFor="let order of delivered">
+          <div class="order-card card border-0 shadow-sm h-100 rounded-4 overflow-hidden opacity-75">
+            <div class="card-header bg-success bg-opacity-10 border-0 pt-3 px-4 pb-0">
+              <span class="badge bg-success rounded-pill px-3 py-2 mb-2">
+                <i class="bi bi-check-circle me-1"></i> DELIVERED
+              </span>
+              <h6 class="fw-bold">#{{ order.trackingNumber }}</h6>
+            </div>
+            <div class="card-body px-4 py-3">
+              <p class="mb-0 small fw-medium">To: {{ order.receiverName }}</p>
+              <small class="text-muted">{{ order.deliveryAddress }}</small>
+              <div class="alert alert-warning py-2 small mt-3 mb-0">
+                <i class="bi bi-exclamation-triangle me-1"></i>Proof of delivery not yet uploaded.
+              </div>
+            </div>
+            <div class="card-footer bg-white border-0 px-4 pb-4">
+              <button class="btn btn-outline-success rounded-pill w-100 fw-medium" (click)="openPodModal(order.assignmentId)">
+                <i class="bi bi-camera me-2"></i>Upload PoD Now
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== DELIVERED + POD TAB ===== -->
+    <div *ngIf="activeTab === 'pod'">
+      <h5 class="fw-bold mb-3" style="color:#7c3aed"><i class="bi bi-patch-check-fill me-2"></i>Delivered with Proof of Delivery</h5>
+      <div *ngIf="deliveredWithPod.length === 0" class="empty-state text-center py-5 bg-white rounded-4 shadow-sm">
+        <i class="bi bi-images display-3 text-muted d-block mb-3"></i>
+        <p class="text-muted mb-0">No deliveries with proof uploaded yet.</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-lg-6 col-xl-4" *ngFor="let order of deliveredWithPod">
+          <div class="pod-card card border-0 shadow-sm h-100 rounded-4 overflow-hidden" (click)="openPodDetailsModal(order)" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            <!-- PoD Image -->
+            <div class="pod-image-wrapper position-relative">
+              <img
+                [src]="'http://localhost:8080' + order.podImageUrl"
+                [alt]="'PoD for ' + order.trackingNumber"
+                class="w-100 pod-thumbnail"
+                (error)="onImageError($event)"
+              >
+              <span class="badge position-absolute top-0 end-0 m-2 rounded-pill px-3"
+                [ngClass]="{'bg-success': order.podStatus === 'PASSED', 'bg-danger': order.podStatus === 'FAILED', 'bg-secondary': order.podStatus === 'PENDING'}">
+                <i class="bi" [ngClass]="{'bi-check-circle': order.podStatus === 'PASSED', 'bi-x-circle': order.podStatus === 'FAILED', 'bi-hourglass': order.podStatus === 'PENDING'}"></i>
+                ML: {{ order.podStatus }}
+              </span>
+            </div>
+            <div class="card-body px-4 py-3">
+              <h6 class="fw-bold mb-1">#{{ order.trackingNumber }}</h6>
+              <p class="mb-0 small fw-medium text-success">Delivered to: {{ order.receiverName }}</p>
+              <small class="text-muted">{{ order.deliveryAddress }}, {{ order.deliveryCity }}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== REJECTED TAB ===== -->
+    <div *ngIf="activeTab === 'rejected'">
+      <h5 class="fw-bold text-danger mb-3"><i class="bi bi-x-circle me-2"></i>Rejected Orders</h5>
+      <div *ngIf="rejected.length === 0 && dismissedPendingOrders.length === 0"
+        class="empty-state text-center py-5 bg-white rounded-4 shadow-sm">
+        <i class="bi bi-emoji-smile display-3 text-muted d-block mb-3"></i>
+        <p class="text-muted mb-0">No rejected orders. Keep it up!</p>
+      </div>
+
+      <!-- Server-side Rejected (from Assigned tab) -->
+      <div *ngIf="rejected.length > 0">
+        <p class="text-muted small fw-medium mb-3">Rejected Assignments</p>
+        <div class="row g-4 mb-4">
+          <div class="col-lg-6 col-xl-4" *ngFor="let order of rejected">
+            <div class="order-card card border-0 shadow-sm h-100 rounded-4 overflow-hidden opacity-60">
+              <div class="card-header bg-danger bg-opacity-10 border-0 pt-3 px-4 pb-0">
+                <span class="badge bg-danger rounded-pill px-3 py-2 mb-2">
+                  <i class="bi bi-x-circle me-1"></i> REJECTED
+                </span>
+                <h6 class="fw-bold">#{{ order.trackingNumber }}</h6>
+              </div>
+              <div class="card-body px-4 py-3">
+                <p class="mb-0 small fw-medium">{{ order.assignmentType }}: {{ order.senderName }} → {{ order.receiverName }}</p>
+                <small class="text-muted">{{ order.assignedAt | date:'medium' }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Client-side Dismissed (Not Interested from Pending tab) -->
+      <div *ngIf="dismissedPendingOrders.length > 0">
+        <p class="text-muted small fw-medium mb-3">Not Interested (Skipped Pending Orders)</p>
+        <div class="row g-4">
+          <div class="col-lg-6 col-xl-4" *ngFor="let order of dismissedPendingOrders">
+            <div class="order-card card border-0 shadow-sm h-100 rounded-4 overflow-hidden opacity-60">
+              <div class="card-header bg-secondary bg-opacity-10 border-0 pt-3 px-4 pb-0">
+                <span class="badge bg-secondary rounded-pill px-3 py-2 mb-2">
+                  <i class="bi bi-slash-circle me-1"></i> NOT INTERESTED
+                </span>
+                <h6 class="fw-bold">#{{ order.trackingNumber }}</h6>
+              </div>
+              <div class="card-body px-4 py-3">
+                <p class="mb-1 small fw-medium text-danger">
+                  <i class="bi bi-geo-alt me-1"></i>{{ order.senderName }}
+                </p>
+                <small class="text-muted d-block">{{ order.senderAddress }}</small>
+                <p class="mb-0 small fw-medium text-success mt-2">
+                  <i class="bi bi-flag me-1"></i>{{ order.receiverName }}
+                </p>
+                <small class="text-muted">{{ order.receiverAddress }}</small>
+                <p *ngIf="order.skippedAt" class="mb-0 mt-2">
+                  <small class="text-muted"><i class="bi bi-clock me-1"></i>Skipped {{ order.skippedAt | date:'medium' }}</small>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PoD Upload Modal -->
+<div id="podModal" class="pod-modal-overlay" style="display:none" (click)="closePodModal()">
+  <div class="pod-modal-box" (click)="$event.stopPropagation()">
+    <div class="pod-modal-header">
+      <h5 class="fw-bold mb-0"><i class="bi bi-camera-fill me-2 text-success"></i>Upload Proof of Delivery</h5>
+      <button class="btn-close" (click)="closePodModal()"></button>
+    </div>
+    <div class="pod-modal-body">
+      <p class="text-muted small mb-3">Upload a clear photo of the delivered package. Image will be stored and visible in the PoD tab.</p>
+
+      <label for="podFileInput" class="pod-drop-zone w-100 text-center p-4 rounded-3 mb-3" style="cursor:pointer; border: 2px dashed #dee2e6; display:block;">
+        <div *ngIf="!imagePreview">
+          <i class="bi bi-cloud-upload display-4 text-muted d-block mb-2"></i>
+          <span class="fw-medium text-muted">Click to select image</span>
+          <small class="d-block text-muted">JPG, PNG, WEBP up to 10MB</small>
+        </div>
+        <div *ngIf="imagePreview">
+          <img [src]="imagePreview" alt="Preview" class="img-fluid rounded-3" style="max-height:200px; object-fit:contain;">
+          <small class="d-block text-success mt-2 fw-medium"><i class="bi bi-check-circle me-1"></i>{{ selectedFile?.name }}</small>
+        </div>
+        <input id="podFileInput" type="file" accept="image/*" class="d-none" (change)="onFileSelected($event)">
+      </label>
+
+      <div *ngIf="podError" class="alert alert-danger py-2 small mb-3">{{ podError }}</div>
+
+      <div class="alert alert-info py-2 small mb-0">
+        <i class="bi bi-info-circle me-1"></i>
+        The image will be saved on the server and shown in the "Delivered + PoD" tab.
+        Files with "blur" or "invalid" in their name fail ML validation.
+      </div>
+    </div>
+    <div class="pod-modal-footer d-flex gap-2">
+      <button class="btn btn-outline-secondary flex-fill rounded-pill" (click)="closePodModal()" [disabled]="podSubmitting">Cancel</button>
+      <button class="btn btn-success flex-fill rounded-pill fw-medium" (click)="submitPod()" [disabled]="!selectedFile || podSubmitting">
+        <span *ngIf="!podSubmitting"><i class="bi bi-send me-1"></i>Submit PoD</span>
+        <span *ngIf="podSubmitting"><span class="spinner-border spinner-border-sm me-1"></span>Uploading...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PoD Details Modal -->
+<div id="podDetailsModal" class="pod-modal-overlay" style="display:none" (click)="closePodDetailsModal()">
+  <div class="pod-modal-box" style="max-width: 800px; width: 95%;" (click)="$event.stopPropagation()" *ngIf="selectedPodOrder">
+    <div class="pod-modal-header border-bottom pb-3 mb-3">
+      <h5 class="fw-bold mb-0">
+        <i class="bi bi-check-circle-fill text-success me-2"></i>
+        Delivery Details #{{ selectedPodOrder.trackingNumber }}
+      </h5>
+      <button class="btn-close" (click)="closePodDetailsModal()"></button>
+    </div>
+    
+    <div class="pod-modal-body" style="max-height: 70vh; overflow-y: auto;">
+      <div class="row g-4">
+        <!-- Image Column -->
+        <div class="col-md-5">
+          <div class="position-relative mb-2 rounded-3 border overflow-hidden p-1 bg-light">
+            <img [src]="'http://localhost:8080' + selectedPodOrder.podImageUrl"
+                class="img-fluid w-100 rounded-2" alt="PoD Image"
+                (error)="onImageError($event)">
+          </div>
+          <span class="badge w-100 py-2 fs-6"
+            [ngClass]="{'bg-success': selectedPodOrder.podStatus === 'PASSED', 'bg-danger': selectedPodOrder.podStatus === 'FAILED', 'bg-secondary': selectedPodOrder.podStatus === 'PENDING'}">
+            <i class="bi" [ngClass]="{'bi-check-circle': selectedPodOrder.podStatus === 'PASSED', 'bi-x-circle': selectedPodOrder.podStatus === 'FAILED', 'bi-hourglass': selectedPodOrder.podStatus === 'PENDING'}"></i>
+            ML Validation: {{ selectedPodOrder.podStatus }}
+          </span>
+        </div>
+        
+        <!-- Details Column -->
+        <div class="col-md-7">
+          <div class="card bg-light border-0 mb-3 rounded-4">
+            <div class="card-body p-3">
+              <h6 class="fw-bold text-muted small text-uppercase mb-2"><i class="bi bi-person me-1"></i>Sender</h6>
+              <p class="mb-0 fw-medium text-dark">{{ selectedPodOrder.senderName }}</p>
+              <p class="text-muted mb-0"><i class="bi bi-telephone ms-1 me-1"></i>{{ selectedPodOrder.senderPhone }}</p>
+              <p class="text-muted small mb-0 mt-1"><i class="bi bi-geo-alt me-1"></i>{{ selectedPodOrder.pickupAddress }}, {{ selectedPodOrder.pickupCity }} {{ selectedPodOrder.pickupState }} {{ selectedPodOrder.pickupPostalCode }}</p>
+            </div>
+          </div>
+          
+          <div class="card bg-success bg-opacity-10 border-0 mb-3 rounded-4">
+            <div class="card-body p-3">
+              <h6 class="fw-bold text-success small text-uppercase mb-2"><i class="bi bi-person-check me-1"></i>Receiver (Delivered To)</h6>
+              <p class="mb-0 fw-medium text-success">{{ selectedPodOrder.receiverName }}</p>
+              <p class="text-muted mb-0"><i class="bi bi-telephone ms-1 me-1"></i>{{ selectedPodOrder.receiverPhone }}</p>
+              <p class="text-muted small mb-0 mt-1"><i class="bi bi-geo-alt me-1"></i>{{ selectedPodOrder.deliveryAddress }}, {{ selectedPodOrder.deliveryCity }} {{ selectedPodOrder.deliveryState }} {{ selectedPodOrder.deliveryPostalCode }}</p>
+            </div>
+          </div>
+
+          <div class="card bg-light border-0 rounded-4">
+            <div class="card-body p-3">
+              <h6 class="fw-bold text-muted small text-uppercase mb-3"><i class="bi bi-box-seam me-1"></i>Package Information</h6>
+              <div class="row g-3 small">
+                <div class="col-6">
+                  <span class="text-muted d-block">Weight</span>
+                  <span class="fw-bold fs-6">{{ selectedPodOrder.weight }} kg</span>
+                </div>
+                <div class="col-6">
+                  <span class="text-muted d-block">Amount</span>
+                  <span class="fw-bold fs-6 text-primary">{{ selectedPodOrder.totalAmount | currency:'USD':'$' }}</span>
+                </div>
+                <div class="col-6">
+                  <span class="text-muted d-block">Payment Mode</span>
+                  <span class="fw-bold fs-6">{{ selectedPodOrder.paymentMode }}</span>
+                </div>
+                <div class="col-6">
+                  <span class="text-muted d-block">Dimensions</span>
+                  <span class="fw-bold fs-6">{{ selectedPodOrder.dimensions }} cm</span>
+                </div>
+                <div class="col-12 border-top pt-2">
+                  <span class="text-muted d-block">Package Description</span>
+                  <span class="fw-medium text-dark">{{ selectedPodOrder.packageDescription }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="pod-modal-footer mt-4 d-flex justify-content-end">
+      <button class="btn btn-secondary px-4 rounded-pill" (click)="closePodDetailsModal()">Close</button>
+    </div>
+  </div>
+</div>

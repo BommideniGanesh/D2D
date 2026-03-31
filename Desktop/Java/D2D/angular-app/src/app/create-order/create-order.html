@@ -1,0 +1,427 @@
+<div class="container my-4">
+    @if (currentStep === 1) {
+    <div class="text-center mb-4">
+        <h2>Add Sender details</h2>
+    </div>
+
+    <form [formGroup]="senderForm" (ngSubmit)="onSubmit()">
+        <div class="row g-3">
+            <!-- First Name & Last Name -->
+            <div class="col-md-6">
+                <label for="firstName" class="form-label">First Name</label>
+                <input type="text" class="form-control" id="firstName" formControlName="firstName"
+                    [class.is-invalid]="senderForm.get('firstName')?.invalid && senderForm.get('firstName')?.touched">
+                <div class="invalid-feedback">First name is required.</div>
+            </div>
+            <div class="col-md-6">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="lastName" formControlName="lastName"
+                    [class.is-invalid]="senderForm.get('lastName')?.invalid && senderForm.get('lastName')?.touched">
+                <div class="invalid-feedback">Last name is required.</div>
+            </div>
+
+            <!-- Phone & Email -->
+            <div class="col-md-6">
+                <label for="phoneNumber" class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" id="phoneNumber" formControlName="phoneNumber"
+                    [class.is-invalid]="senderForm.get('phoneNumber')?.invalid && senderForm.get('phoneNumber')?.touched">
+                <div class="invalid-feedback">Phone number is required.</div>
+            </div>
+            <div class="col-md-6">
+                <label for="email" class="form-label">Email <span class="text-muted">(Optional)</span></label>
+                <input type="email" class="form-control" id="email" formControlName="email"
+                    [class.is-invalid]="senderForm.get('email')?.invalid && senderForm.get('email')?.touched">
+                <div class="invalid-feedback">Please provide a valid email.</div>
+            </div>
+
+            <!-- Address Line 1 -->
+            <div class="col-12">
+                <label for="addressLine1" class="form-label">Address Line 1</label>
+                <input type="text" class="form-control" id="addressLine1" formControlName="addressLine1"
+                    placeholder="1234 Main St"
+                    [class.is-invalid]="senderForm.get('addressLine1')?.invalid && senderForm.get('addressLine1')?.touched">
+                <div class="invalid-feedback">Address is required.</div>
+            </div>
+
+            <!-- Address Line 2 -->
+            <div class="col-12">
+                <label for="addressLine2" class="form-label">Address Line 2 <span
+                        class="text-muted">(Optional)</span></label>
+                <input type="text" class="form-control" id="addressLine2" formControlName="addressLine2"
+                    placeholder="Apartment, studio, or floor">
+            </div>
+
+            <!-- City, State, Zip -->
+            <div class="col-md-5">
+                <label for="city" class="form-label">City</label>
+                <input type="text" class="form-control" id="city" formControlName="city"
+                    [class.is-invalid]="senderForm.get('city')?.invalid && senderForm.get('city')?.touched">
+                <div class="invalid-feedback">City is required.</div>
+            </div>
+            <div class="col-md-4">
+                <label for="state" class="form-label">State</label>
+                <input type="text" class="form-control" id="state" formControlName="state"
+                    [class.is-invalid]="senderForm.get('state')?.invalid && senderForm.get('state')?.touched">
+                <div class="invalid-feedback">State is required.</div>
+            </div>
+            <div class="col-md-3">
+                <label for="postalCode" class="form-label">Postal Code</label>
+                <input type="text" class="form-control" id="postalCode" formControlName="postalCode"
+                    [class.is-invalid]="senderForm.get('postalCode')?.invalid && senderForm.get('postalCode')?.touched">
+                <div class="invalid-feedback">Zip required.</div>
+            </div>
+
+            <!-- Country -->
+            <div class="col-12">
+                <label for="country" class="form-label">Country</label>
+                <input type="text" class="form-control" id="country" formControlName="country"
+                    [class.is-invalid]="senderForm.get('country')?.invalid && senderForm.get('country')?.touched">
+                <div class="invalid-feedback">Country is required.</div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary w-100">Next</button>
+        </div>
+    </form>
+    } @else if (currentStep === 2) {
+    <div class="text-center mb-4">
+        <h2>Receiver Information</h2>
+    </div>
+
+    <form [formGroup]="receiverForm" (ngSubmit)="onReceiverSubmit()">
+        <div class="row g-3">
+            <!-- First Name & Last Name -->
+            <div class="col-md-6">
+                <label for="r_firstName" class="form-label">First Name</label>
+                <input type="text" class="form-control" id="r_firstName" formControlName="firstName"
+                    [class.is-invalid]="receiverForm.get('firstName')?.invalid && receiverForm.get('firstName')?.touched">
+                <div class="invalid-feedback">First name is required.</div>
+            </div>
+            <div class="col-md-6">
+                <label for="r_lastName" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="r_lastName" formControlName="lastName"
+                    [class.is-invalid]="receiverForm.get('lastName')?.invalid && receiverForm.get('lastName')?.touched">
+                <div class="invalid-feedback">Last name is required.</div>
+            </div>
+
+            <!-- Phone & Email -->
+            <div class="col-md-6">
+                <label for="r_phoneNumber" class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" id="r_phoneNumber" formControlName="phoneNumber"
+                    [class.is-invalid]="receiverForm.get('phoneNumber')?.invalid && receiverForm.get('phoneNumber')?.touched">
+                <div class="invalid-feedback">Phone number is required.</div>
+            </div>
+            <div class="col-md-6">
+                <label for="r_email" class="form-label">Email <span class="text-muted">(Optional)</span></label>
+                <input type="email" class="form-control" id="r_email" formControlName="email"
+                    [class.is-invalid]="receiverForm.get('email')?.invalid && receiverForm.get('email')?.touched">
+                <div class="invalid-feedback">Please provide a valid email.</div>
+            </div>
+
+            <!-- Address Line 1 -->
+            <div class="col-12">
+                <label for="r_addressLine1" class="form-label">Address Line 1</label>
+                <input type="text" class="form-control" id="r_addressLine1" formControlName="addressLine1"
+                    placeholder="1234 Main St"
+                    [class.is-invalid]="receiverForm.get('addressLine1')?.invalid && receiverForm.get('addressLine1')?.touched">
+                <div class="invalid-feedback">Address is required.</div>
+            </div>
+
+            <!-- Address Line 2 -->
+            <div class="col-12">
+                <label for="r_addressLine2" class="form-label">Address Line 2 <span
+                        class="text-muted">(Optional)</span></label>
+                <input type="text" class="form-control" id="r_addressLine2" formControlName="addressLine2"
+                    placeholder="Apartment, studio, or floor">
+            </div>
+
+            <!-- City, State, Zip -->
+            <div class="col-md-5">
+                <label for="r_city" class="form-label">City</label>
+                <input type="text" class="form-control" id="r_city" formControlName="city"
+                    [class.is-invalid]="receiverForm.get('city')?.invalid && receiverForm.get('city')?.touched">
+                <div class="invalid-feedback">City is required.</div>
+            </div>
+            <div class="col-md-4">
+                <label for="r_state" class="form-label">State</label>
+                <input type="text" class="form-control" id="r_state" formControlName="state"
+                    [class.is-invalid]="receiverForm.get('state')?.invalid && receiverForm.get('state')?.touched">
+                <div class="invalid-feedback">State is required.</div>
+            </div>
+            <div class="col-md-3">
+                <label for="r_postalCode" class="form-label">Postal Code</label>
+                <input type="text" class="form-control" id="r_postalCode" formControlName="postalCode"
+                    [class.is-invalid]="receiverForm.get('postalCode')?.invalid && receiverForm.get('postalCode')?.touched">
+                <div class="invalid-feedback">Zip required.</div>
+            </div>
+
+            <!-- Country -->
+            <div class="col-12">
+                <label for="r_country" class="form-label">Country</label>
+                <input type="text" class="form-control" id="r_country" formControlName="country"
+                    [class.is-invalid]="receiverForm.get('country')?.invalid && receiverForm.get('country')?.touched">
+                <div class="invalid-feedback">Country is required.</div>
+            </div>
+
+            <!-- Delivery Instructions -->
+            <div class="col-12">
+                <label for="deliveryInstructions" class="form-label">Delivery Instructions <span
+                        class="text-muted">(Optional)</span></label>
+                <textarea class="form-control" id="deliveryInstructions" formControlName="deliveryInstructions"
+                    rows="3"></textarea>
+            </div>
+
+            <!-- Is Residential -->
+            <div class="col-12">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="isResidential" formControlName="isResidential">
+                    <label class="form-check-label" for="isResidential">
+                        Is Residential Address?
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex justify-content-between">
+            <button type="button" class="btn btn-secondary" (click)="backToSender()">Back</button>
+            <button type="submit" class="btn btn-primary">Save Receiver Details</button>
+        </div>
+    </form>
+    } @else if (currentStep === 3) {
+    <div class="text-center mb-4">
+        <h2>Package Details</h2>
+    </div>
+
+    <form [formGroup]="packageForm" (ngSubmit)="onPackageSubmit()">
+
+        <div class="row g-3">
+            <!-- Package Count -->
+            <div class="col-md-6">
+                <label for="packageCount" class="form-label">Package Count</label>
+                <input id="packageCount" type="number" formControlName="packageCount" class="form-control"
+                    [class.is-invalid]="packageForm.get('packageCount')?.invalid && packageForm.get('packageCount')?.touched" />
+                <div class="invalid-feedback">
+                    Package count is required and must be at least 1.
+                </div>
+            </div>
+
+            <!-- Box Type -->
+            <div class="col-md-6">
+                <label for="boxType" class="form-label">Box Type</label>
+                <select id="boxType" formControlName="boxType" class="form-select"
+                    [class.is-invalid]="packageForm.get('boxType')?.invalid && packageForm.get('boxType')?.touched">
+                    <option *ngFor="let type of boxTypes" [value]="type">{{ type }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    Box Type is required.
+                </div>
+            </div>
+
+            <!-- Dimensions -->
+            <div class="col-12">
+                <label class="form-label">Dimensions (cm)</label>
+                <div class="row g-2">
+                    <div class="col">
+                        <input type="number" placeholder="Length" formControlName="lengthCm" class="form-control"
+                            [class.is-invalid]="packageForm.get('lengthCm')?.invalid && packageForm.get('lengthCm')?.touched" />
+                    </div>
+                    <div class="col">
+                        <input type="number" placeholder="Width" formControlName="widthCm" class="form-control"
+                            [class.is-invalid]="packageForm.get('widthCm')?.invalid && packageForm.get('widthCm')?.touched" />
+                    </div>
+                    <div class="col">
+                        <input type="number" placeholder="Height" formControlName="heightCm" class="form-control"
+                            [class.is-invalid]="packageForm.get('heightCm')?.invalid && packageForm.get('heightCm')?.touched" />
+                    </div>
+                </div>
+                <div *ngIf="(packageForm.get('lengthCm')?.invalid && packageForm.get('lengthCm')?.touched) || 
+                        (packageForm.get('widthCm')?.invalid && packageForm.get('widthCm')?.touched) || 
+                        (packageForm.get('heightCm')?.invalid && packageForm.get('heightCm')?.touched)"
+                    class="invalid-feedback d-block">
+                    All dimensions are required.
+                </div>
+            </div>
+
+            <!-- Weight -->
+            <div class="col-md-6">
+                <label for="weightKg" class="form-label">Weight (kg)</label>
+                <input id="weightKg" type="number" formControlName="weightKg" class="form-control"
+                    [class.is-invalid]="packageForm.get('weightKg')?.invalid && packageForm.get('weightKg')?.touched" />
+                <div class="invalid-feedback">
+                    Weight is required.
+                </div>
+            </div>
+
+            <!-- Packaging Type -->
+            <div class="col-md-6">
+                <label for="packagingType" class="form-label">Packaging Type</label>
+                <select id="packagingType" formControlName="packagingType" class="form-select"
+                    [class.is-invalid]="packageForm.get('packagingType')?.invalid && packageForm.get('packagingType')?.touched">
+                    <option *ngFor="let type of packagingTypes" [value]="type">{{ type }}</option>
+                </select>
+                <div class="invalid-feedback">
+                    Packaging Type is required.
+                </div>
+            </div>
+
+            <!-- Seal Type -->
+            <div class="col-md-6">
+                <label for="sealType" class="form-label">Seal Type <span class="text-muted">(Optional)</span></label>
+                <select id="sealType" formControlName="sealType" class="form-select">
+                    <option [ngValue]="null">Select Seal Type</option>
+                    <option *ngFor="let type of sealTypes" [value]="type">{{ type }}</option>
+                </select>
+            </div>
+
+            <!-- Checks -->
+            <div class="col-12">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="fragile" formControlName="fragile">
+                    <label class="form-check-label" for="fragile">Fragile</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="hazardousMaterial"
+                        formControlName="hazardousMaterial">
+                    <label class="form-check-label" for="hazardousMaterial">Hazardous Material</label>
+                </div>
+            </div>
+
+            <!-- Handling Instructions -->
+            <div class="col-12">
+                <label for="handlingInstructions" class="form-label">Handling Instructions <span
+                        class="text-muted">(Optional)</span></label>
+                <textarea id="handlingInstructions" formControlName="handlingInstructions" class="form-control"
+                    rows="3"></textarea>
+            </div>
+
+        </div>
+
+        <div class="mt-4 d-flex justify-content-between">
+            <button type="button" class="btn btn-secondary" (click)="backToReceiver()">Back</button>
+            <button type="submit" class="btn btn-primary">Next</button>
+        </div>
+    </form>
+    } @else if (currentStep === 4) {
+    <!-- Step 4: Shipment & Confirmation -->
+    <div class="text-center mb-4">
+        <h2>Shipment Details & Confirmation</h2>
+    </div>
+
+    <div class="row">
+        <!-- Summary Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>From:</strong> {{ senderForm.get('firstName')?.value }} {{
+                        senderForm.get('lastName')?.value }}</p>
+                    <p class="text-muted">{{ senderForm.get('city')?.value }}, {{ senderForm.get('country')?.value }}
+                    </p>
+
+                    <hr>
+
+                    <p><strong>To:</strong> {{ receiverForm.get('firstName')?.value }} {{
+                        receiverForm.get('lastName')?.value }}</p>
+                    <p class="text-muted">{{ receiverForm.get('city')?.value }}, {{ receiverForm.get('country')?.value
+                        }}</p>
+
+                    <hr>
+
+                    <p><strong>Package:</strong> {{ packageForm.get('packageCount')?.value }}x {{
+                        packageForm.get('boxType')?.value }}</p>
+                    <p class="text-muted">{{ packageForm.get('weightKg')?.value }}kg - {{
+                        packageForm.get('packagingType')?.value }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cost Breakdown Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Cost Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info border-0 rounded p-3 mb-0">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        Shipping costs are dynamically calculated based on dimensional weight and current localized weather/demand surges at pickup.
+                        <br><br>
+                        <strong>The final verified cost will be generated upon Order Placement.</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form [formGroup]="shipmentForm" (ngSubmit)="onShipmentSubmit()">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Shipment Options</h5>
+                <div class="row g-3">
+
+                    <!-- Payment Mode -->
+                    <div class="col-md-6">
+                        <label for="paymentMode" class="form-label">Payment Mode</label>
+                        <select id="paymentMode" formControlName="paymentMode" class="form-select">
+                            <option *ngFor="let mode of paymentModes" [value]="mode">{{ mode }}</option>
+                        </select>
+                    </div>
+
+                    <!-- Insurance Provider -->
+                    <div class="col-md-6">
+                        <label for="insuranceProvider" class="form-label">Insurance Provider <span
+                                class="text-muted">(If Insured)</span></label>
+                        <input type="text" class="form-control" id="insuranceProvider"
+                            formControlName="insuranceProvider" placeholder="e.g. Allianz">
+                    </div>
+
+                    <!-- Checkboxes -->
+                    <div class="col-12 mt-3">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="insured" formControlName="insured">
+                            <label class="form-check-label" for="insured">Insure this shipment</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="signatureRequired"
+                                formControlName="signatureRequired">
+                            <label class="form-check-label" for="signatureRequired">Signature Required</label>
+                        </div>
+                    </div>
+
+                    <!-- Age Restriction Details -->
+                    <div class="col-12 mt-3 p-3 border rounded bg-light" formGroupName="ageRestrictionDetails">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="isRestricted"
+                                formControlName="isRestricted">
+                            <label class="form-check-label fw-bold" for="isRestricted">Age Restricted Item</label>
+                        </div>
+
+                        <div class="row g-3" *ngIf="shipmentForm.get('ageRestrictionDetails.isRestricted')?.value">
+                            <div class="col-md-6">
+                                <label for="minimumAge" class="form-label">Minimum Age</label>
+                                <input type="number" class="form-control" id="minimumAge" formControlName="minimumAge">
+                            </div>
+                            <div class="col-md-6 d-flex align-items-end">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="idCheckRequired"
+                                        formControlName="idCheckRequired">
+                                    <label class="form-check-label" for="idCheckRequired">ID Check Required upon
+                                        Delivery</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex justify-content-between">
+            <button type="button" class="btn btn-secondary" (click)="backToPackage()">Back</button>
+            <button type="submit" class="btn btn-success btn-lg">Place Order</button>
+        </div>
+    </form>
+    }
+</div>

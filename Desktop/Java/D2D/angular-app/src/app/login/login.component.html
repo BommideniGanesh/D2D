@@ -1,0 +1,82 @@
+<div class="d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 150px);">
+
+  <!-- Toast Notification -->
+  <div *ngIf="showToast" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+    <div class="toast show align-items-center text-white border-0" [class.bg-success]="toastType === 'success'"
+      [class.bg-danger]="toastType === 'error'" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          {{ toastMessage }}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="showToast = false"
+          aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row w-100 bg-white shadow-lg rounded overflow-hidden" style="max-width: 1000px;">
+
+    <!-- Image Side (Left Side for Login) -->
+    <div class="col-md-6 p-0 relative d-none d-md-block order-1">
+      <div class="h-100 w-100 image-side d-flex flex-column justify-content-center p-4 text-white">
+        <!-- <div class="overlay"></div>
+                <div class="content position-relative z-1">
+                    <h1 class="display-3 fw-bold">Hello<br>World.</h1>
+                    <p class="mt-3 lead">Lorem ipsum dolor sit amet, consectetur adipiscing elit sed eget aliquet.</p>
+                    <p class="mt-5 fs-4">601 X 864</p>
+                </div> -->
+      </div>
+    </div>
+
+    <!-- Form Side (Right Side for Login) -->
+    <div class="col-md-6 p-4 d-flex flex-column justify-content-center order-2">
+
+      <!-- Login Form -->
+      <div>
+        <h2 class="fw-bold mb-4">Login</h2>
+        <p class="text-muted mb-4">Don't have an account? <a routerLink="/register"
+            class="text-info text-decoration-none">Create your account</a>,
+          it takes less than a minute</p>
+        <p class="text-muted mb-4">Forgot your password? <a routerLink="/forgot-password"
+            class="text-info text-decoration-none">Reset it here</a></p>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div class="mb-3">
+            <label class="form-label text-uppercase text-muted small fw-bold">Email ID</label>
+            <input type="email" class="form-control border-0 border-bottom rounded-0 ps-0"
+              placeholder="name@example.com" formControlName="email">
+            <div *ngIf="l['email'].touched && l['email'].errors" class="text-danger small mt-1">
+              <span *ngIf="l['email'].errors['required']">Email is required</span>
+              <span *ngIf="l['email'].errors['email']">Invalid email format</span>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-uppercase text-muted small fw-bold">Password</label>
+            <div class="input-group border-bottom">
+              <input [type]="showLoginPassword ? 'text' : 'password'"
+                class="form-control border-0 rounded-0 ps-0 box-shadow-none" placeholder="Enter Password"
+                formControlName="password" style="box-shadow: none;">
+              <button type="button" class="btn input-group-text bg-white border-0" (click)="togglePasswordVisibility()"
+                style="cursor: pointer;">
+                <i class="bi" [class.bi-eye]="!showLoginPassword" [class.bi-eye-slash]="showLoginPassword"></i>
+              </button>
+            </div>
+            <div *ngIf="l['password'].touched && l['password'].errors" class="text-danger small mt-1">
+              <span *ngIf="l['password'].errors['required']">Password is required</span>
+            </div>
+          </div>
+          <div class="mb-4 form-check">
+            <input type="checkbox" class="form-check-input" id="loginCheck">
+            <label class="form-check-label text-muted small" for="loginCheck">I accept terms and conditions
+              & privacy policy</label>
+          </div>
+          <div class="d-grid mb-3">
+            <button class="btn btn-danger rounded-pill py-2 fw-bold text-uppercase shadow-sm"
+              style="background-color: #ff3366; border: none;" [disabled]="loginForm.invalid">Login</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>

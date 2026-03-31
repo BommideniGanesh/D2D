@@ -1,0 +1,183 @@
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">{{ isEditMode ? 'Update' : 'Add' }} Driver Details</h3>
+                    <div class="d-flex align-items-center gap-2" *ngIf="existingDriver">
+                        <!-- Verified State: Just the icon -->
+                        <div *ngIf="existingDriver.isVerified" class="text-primary" title="Verified Driver">
+                            <i class="bi bi-patch-check-fill fs-4"></i>
+                        </div>
+
+                        <!-- Unverified State: Badge + Button -->
+                        <div *ngIf="!existingDriver.isVerified" class="d-flex align-items-center gap-2">
+                            <span class="badge bg-danger">
+                                <i class="bi bi-x-circle-fill me-1"></i> Unverified
+                            </span>
+                            <button class="btn btn-light btn-sm" (click)="verifyDriver()">
+                                <i class="bi bi-shield-check me-1"></i> Verify Me
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <form [formGroup]="driverForm" (ngSubmit)="onSubmit()">
+
+                        <!-- Personal Information -->
+                        <h5 class="mb-3 text-primary">Personal Information</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">First Name *</label>
+                                <input type="text" class="form-control" formControlName="firstName">
+                                <div *ngIf="driverForm.get('firstName')?.touched && driverForm.get('firstName')?.errors"
+                                    class="text-danger small mt-1">
+                                    First name is required
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Last Name *</label>
+                                <input type="text" class="form-control" formControlName="lastName">
+                                <div *ngIf="driverForm.get('lastName')?.touched && driverForm.get('lastName')?.errors"
+                                    class="text-danger small mt-1">
+                                    Last name is required
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number *</label>
+                            <input type="tel" class="form-control" formControlName="phoneNumber"
+                                placeholder="+1234567890">
+                            <div *ngIf="driverForm.get('phoneNumber')?.touched && driverForm.get('phoneNumber')?.errors"
+                                class="text-danger small mt-1">
+                                Valid phone number is required
+                            </div>
+                        </div>
+
+                        <!-- Address Information -->
+                        <h5 class="mb-3 mt-4 text-primary">Address Information</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Address Line 1 *</label>
+                            <input type="text" class="form-control" formControlName="addressLine1">
+                            <div *ngIf="driverForm.get('addressLine1')?.touched && driverForm.get('addressLine1')?.errors"
+                                class="text-danger small mt-1">
+                                Address is required
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Address Line 2</label>
+                            <input type="text" class="form-control" formControlName="addressLine2">
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">State *</label>
+                                <input type="text" class="form-control" formControlName="state">
+                                <div *ngIf="driverForm.get('state')?.touched && driverForm.get('state')?.errors"
+                                    class="text-danger small mt-1">
+                                    State is required
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Pincode *</label>
+                                <input type="text" class="form-control" formControlName="pincode" placeholder="90001">
+                                <div *ngIf="driverForm.get('pincode')?.touched && driverForm.get('pincode')?.errors"
+                                    class="text-danger small mt-1">
+                                    Valid 5-6 digit pincode is required
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- License Information -->
+                        <h5 class="mb-3 mt-4 text-primary">License Information</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">License Number *</label>
+                                <input type="text" class="form-control" formControlName="licenseNumber">
+                                <div *ngIf="driverForm.get('licenseNumber')?.touched && driverForm.get('licenseNumber')?.errors"
+                                    class="text-danger small mt-1">
+                                    License number is required
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">License Type *</label>
+                                <select class="form-select" formControlName="licenseType">
+                                    <option *ngFor="let type of licenseTypes" [value]="type">{{ type }}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">License Expiry Date *</label>
+                            <input type="date" class="form-control" formControlName="licenseExpiryDate">
+                            <div *ngIf="driverForm.get('licenseExpiryDate')?.touched && driverForm.get('licenseExpiryDate')?.errors"
+                                class="text-danger small mt-1">
+                                License expiry date is required
+                            </div>
+                        </div>
+
+                        <!-- Vehicle Information -->
+                        <h5 class="mb-3 mt-4 text-primary">Vehicle Information</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Vehicle Number *</label>
+                                <input type="text" class="form-control" formControlName="vehicleNumber"
+                                    placeholder="CA-XYZ-1234">
+                                <div *ngIf="driverForm.get('vehicleNumber')?.touched && driverForm.get('vehicleNumber')?.errors"
+                                    class="text-danger small mt-1">
+                                    Vehicle number is required
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Vehicle Type *</label>
+                                <select class="form-select" formControlName="vehicleType">
+                                    <option *ngFor="let type of vehicleTypes" [value]="type">{{ type }}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Vehicle Model *</label>
+                                <input type="text" class="form-control" formControlName="vehicleModel"
+                                    placeholder="Ford Transit">
+                                <div *ngIf="driverForm.get('vehicleModel')?.touched && driverForm.get('vehicleModel')?.errors"
+                                    class="text-danger small mt-1">
+                                    Vehicle model is required
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Vehicle Color *</label>
+                                <input type="text" class="form-control" formControlName="vehicleColor"
+                                    placeholder="White">
+                                <div *ngIf="driverForm.get('vehicleColor')?.touched && driverForm.get('vehicleColor')?.errors"
+                                    class="text-danger small mt-1">
+                                    Vehicle color is required
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Availability Status -->
+                        <h5 class="mb-3 mt-4 text-primary">Availability</h5>
+                        <div class="mb-4">
+                            <label class="form-label">Availability Status *</label>
+                            <select class="form-select" formControlName="availabilityStatus">
+                                <option *ngFor="let status of availabilityStatuses" [value]="status">{{ status }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" [disabled]="driverForm.invalid">
+                                {{ isEditMode ? 'Update' : 'Save' }} Driver Details
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

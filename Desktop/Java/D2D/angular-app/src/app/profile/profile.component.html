@@ -1,0 +1,64 @@
+<div class="container py-5">
+
+    <!-- Toast Notification -->
+    <div *ngIf="showToast" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+        <div class="toast show align-items-center text-white border-0" [class.bg-success]="toastType === 'success'"
+            [class.bg-danger]="toastType === 'error'" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    {{ toastMessage }}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="showToast = false"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 border-bottom d-flex align-items-center">
+                    <i class="bi bi-person-circle fs-4 text-primary me-2"></i>
+                    <h4 class="mb-0 fw-bold">My Profile</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+
+                        <div class="mb-4">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Full Name</label>
+                            <input type="text" class="form-control" formControlName="name" placeholder="John Doe">
+                            <div *ngIf="f['name'].touched && f['name'].errors" class="text-danger small mt-1">
+                                <span *ngIf="f['name'].errors['required']">Name is required</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Email Address</label>
+                            <input type="email" class="form-control" formControlName="email"
+                                placeholder="name@example.com">
+                            <div *ngIf="f['email'].touched && f['email'].errors" class="text-danger small mt-1">
+                                <span *ngIf="f['email'].errors['required']">Email is required</span>
+                                <span *ngIf="f['email'].errors['email']">Invalid email format</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Phone Number</label>
+                            <input type="tel" class="form-control" formControlName="phone" placeholder="+1234567890">
+                            <div *ngIf="f['phone'].touched && f['phone'].errors" class="text-danger small mt-1">
+                                <span *ngIf="f['phone'].errors['required']">Phone number is required</span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-5">
+                            <button type="submit" class="btn btn-primary py-2 fw-bold shadow-sm"
+                                [disabled]="profileForm.invalid">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

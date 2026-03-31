@@ -1,0 +1,136 @@
+<!-- Show the FAB and panels for all users -->
+
+  <!-- ═══ FAB BUTTON ════════════════════════════════════════════════ -->
+  <button class="chat-fab" [class.admin-fab]="isAdmin" [class.connected]="isConnected && !isAdmin" (click)="onFabClick()">
+    @if (isAdmin) {
+      <i class="bi bi-chat-square-text-fill"></i>
+      <span class="fab-label">Inbox</span>
+      @if (hasNewMessage) { <span class="notif-dot"></span> }
+    } @else {
+      <i class="bi" [class.bi-headset]="!isConnected" [class.bi-chat-dots-fill]="isConnected"></i>
+      <span class="fab-label">{{ isConnected ? 'Chat' : 'Support' }}</span>
+    }
+  </button>
+
+  <!-- ═══ USER: CONNECT FORM ════════════════════════════════════════ -->
+  @if (!isAdmin && panelState === 'connect') {
+    <div class="chat-panel animate-up">
+      <div class="panel-header">
+        <div class="d-flex align-items-center gap-2">
+          <div class="header-avatar bg-info"><i class="bi bi-headset"></i></div>
+          <div>
+            <p class="mb-0 fw-bold">Connect to Agent</p>
+            <small class="opacity-75">We usually reply in minutes</small>
+          </div>
+        </div>
+        <button class="btn-x" (click)="close()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="panel-body p-4">
+        <p class="text-muted small mb-3">Please enter your name so our agent can greet you 👋</p>
+        <input class="form-control chat-field mb-3" placeholder="Your name..." [(ngModel)]="displayName" (keyup.enter)="connectUser()" />
+        <button class="btn btn-info w-100 text-white fw-bold" (click)="connectUser()" [disabled]="!displayName.trim()">
+          <i class="bi bi-plug-fill me-1"></i> Start Chat
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ═══ USER: CHAT WINDOW ═════════════════════════════════════════ -->
+  @if (!isAdmin && panelState === 'chat') {
+    <div class="chat-panel animate-up">
+      <div class="panel-header">
+        <div class="d-flex align-items-center gap-2">
+          <div class="header-avatar bg-success"><i class="bi bi-headset"></i></div>
+          <div>
+            <p class="mb-0 fw-bold">Agent Support</p>
+            <small class="text-success"><i class="bi bi-circle-fill me-1" style="font-size:.45rem"></i>Connected</small>
+          </div>
+        </div>
+        <button class="btn-x" (click)="close()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="panel-chat-body" #chatBody>
+        @if (messages.length === 0) {
+          <p class="text-center text-muted small mt-4">Say hello to start the conversation!</p>
+        }
+        @for (msg of messages; track $index) {
+          <div class="d-flex mb-2" [class.justify-content-end]="msg.senderId !== 'OPERATION_SUPPORT'">
+            <div class="widget-bubble"
+                 [class.bubble-me]="msg.senderId !== 'OPERATION_SUPPORT'"
+                 [class.bubble-them]="msg.senderId === 'OPERATION_SUPPORT'">
+              {{ msg.content }}
+              @if (msg.timestamp) {
+                <div class="msg-time">{{ msg.timestamp | date:'shortTime' }}</div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+      <div class="panel-input-row">
+        <input class="form-control chat-field-sm" placeholder="Type a message..." [(ngModel)]="newMessage" (keyup.enter)="sendUserMsg()" />
+        <button class="btn btn-info btn-sm text-white send-btn" (click)="sendUserMsg()"><i class="bi bi-send-fill"></i></button>
+      </div>
+    </div>
+  }
+
+  <!-- ═══ ADMIN: CONTACT LIST ═══════════════════════════════════════ -->
+  @if (isAdmin && panelState === 'adminList') {
+    <div class="chat-panel animate-up">
+      <div class="panel-header admin-header">
+        <div class="d-flex align-items-center gap-2">
+          <div class="header-avatar bg-primary"><i class="bi bi-people-fill"></i></div>
+          <p class="mb-0 fw-bold">User Messages</p>
+        </div>
+        <button class="btn-x" (click)="close()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div style="background:#13131f; max-height:320px; overflow-y:auto;">
+        @if (contacts.length === 0) {
+          <p class="text-center text-muted small p-4">No conversations yet.</p>
+        }
+        @for (contact of contacts; track contact) {
+          <div class="contact-row" (click)="selectContact(contact)">
+            <div class="contact-av">{{ initial(contact) }}</div>
+            <div class="flex-grow-1">
+              <p class="mb-0 fw-semibold" style="color:#e0e0e0; font-size:.88rem;">{{ contact }}</p>
+              <small class="text-muted">Click to reply</small>
+            </div>
+            <i class="bi bi-chevron-right text-muted"></i>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ═══ ADMIN: CHAT WINDOW ════════════════════════════════════════ -->
+  @if (isAdmin && panelState === 'adminChat') {
+    <div class="chat-panel animate-up">
+      <div class="panel-header admin-header">
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn p-0 text-white me-1" (click)="backToList()"><i class="bi bi-arrow-left"></i></button>
+          <div class="header-avatar bg-primary">{{ initial(selectedContact) }}</div>
+          <p class="mb-0 fw-bold">{{ selectedContact }}</p>
+        </div>
+        <button class="btn-x" (click)="close()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="panel-chat-body" #chatBody>
+        @if (messages.length === 0) {
+          <p class="text-center text-muted small mt-4">No messages yet. Say hi! 👋</p>
+        }
+        @for (msg of messages; track $index) {
+          <div class="d-flex mb-2" [class.justify-content-end]="msg.senderId === 'OPERATION_SUPPORT'">
+            <div class="widget-bubble"
+                 [class.bubble-me]="msg.senderId === 'OPERATION_SUPPORT'"
+                 [class.bubble-them]="msg.senderId !== 'OPERATION_SUPPORT'">
+              {{ msg.content }}
+              @if (msg.timestamp) {
+                <div class="msg-time">{{ msg.timestamp | date:'shortTime' }}</div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+      <div class="panel-input-row">
+        <input class="form-control chat-field-sm" placeholder="Reply..." [(ngModel)]="newMessage" (keyup.enter)="sendAdminMsg()" />
+        <button class="btn btn-primary btn-sm text-white send-btn" (click)="sendAdminMsg()"><i class="bi bi-send-fill"></i></button>
+      </div>
+    </div>
+  }

@@ -1,0 +1,148 @@
+<nav class="navbar navbar-expand-lg bg-dark border-bottom border-body" data-bs-theme="dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">D2D</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+        <!-- Not logged in -->
+        @if (!isLoggedIn) {
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="activeLink === 'Home'" (click)="setActive('Home')" routerLink="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="activeLink === 'Reviews'" (click)="setActive('Reviews')"
+            href="#reviews">Reviews</a>
+        </li>
+
+        } @else {
+
+        <!-- Admin -->
+        @if (isAdmin()) {
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/dashboard" [class.active]="activeLink === 'AdminDashboard'"
+            (click)="setActive('AdminDashboard')">Admin Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/hire-driver" [class.active]="activeLink === 'HireDriver'"
+            (click)="setActive('HireDriver')">
+            <i class="bi bi-taxi-front me-1"></i>Hire Driver
+          </a>
+        </li>
+
+        <!-- Driver -->
+        } @else if (isDriver()) {
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/pending-orders" [class.active]="activeLink === 'PendingOrders'"
+            (click)="setActive('PendingOrders')">
+            <i class="bi bi-inbox me-1"></i>Pending Orders
+          </a>
+        </li>
+        <!-- <li class="nav-item">
+          <a class="nav-link" routerLink="/delivered-orders" [class.active]="activeLink === 'DeliveredOrders'"
+            (click)="setActive('DeliveredOrders')">
+            <i class="bi bi-check2-circle me-1"></i>Delivered
+          </a>
+        </li> -->
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/earnings" [class.active]="activeLink === 'Earnings'"
+            (click)="setActive('Earnings')">
+            <i class="bi bi-cash-stack me-1"></i>Earnings
+          </a>
+        </li>
+        <!-- <li class="nav-item">
+          <a class="nav-link" routerLink="/live-tracking" [class.active]="activeLink === 'LiveTracking'"
+            (click)="setActive('LiveTracking')">
+            <i class="bi bi-geo-alt me-1"></i>Live Tracking
+          </a>
+        </li> -->
+
+        <!-- Regular User -->
+        } @else {
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/create-order" [class.active]="activeLink === 'CreateOrder'"
+            (click)="setActive('CreateOrder')">
+            <i class="bi bi-plus-circle me-1"></i>Create Order
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/my-orders" [class.active]="activeLink === 'MyOrder'"
+            (click)="setActive('MyOrder')">
+            <i class="bi bi-box me-1"></i>My Orders
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/tracking" [class.active]="activeLink === 'Tracking'"
+            (click)="setActive('Tracking')">
+            <i class="bi bi-search me-1"></i>Track Package
+          </a>
+        </li>
+        <!-- <li class="nav-item">
+                    <a class="nav-link" routerLink="/wallet" [class.active]="activeLink === 'Wallet'"
+                        (click)="setActive('Wallet')">
+                        <i class="bi bi-wallet2 me-1"></i>Wallet
+                    </a>
+                </li> -->
+        }
+        }
+      </ul>
+
+      <!-- Right side: login / user avatar -->
+      <ul class="navbar-nav">
+        @if (!isLoggedIn) {
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="activeLink === 'Login'" (click)="setActive('Login')"
+            routerLink="/login">Login</a>
+        </li>
+        } @else {
+        <li class="nav-item dropdown">
+          <a class="nav-link d-flex align-items-center" href="#" role="button"
+            (click)="$event.preventDefault(); toggleProfileMenu()">
+            <div class="profile-circle">
+              <i class="bi bi-person">{{ isDriver() ? 'D' : 'U' }}</i>
+            </div>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end position-absolute" [class.show]="showProfileMenu">
+            <li class="dropdown-header text-muted small px-3 py-1">
+              {{ isDriver() ? '🚚 Driver Account' : isAdmin() ? '🔐 Admin Account' : '👤 User Account' }}
+            </li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item" routerLink="/profile" (click)="toggleProfileMenu()">
+                <i class="bi bi-person-circle me-2"></i>My Profile
+              </a>
+            </li>
+            @if (!isDriver() && !isAdmin()) {
+            <li><a class="dropdown-item" routerLink="/my-orders" (click)="toggleProfileMenu()">
+                <i class="bi bi-box me-2"></i>My Orders
+              </a>
+            </li>
+            <li><a class="dropdown-item" routerLink="/wallet" (click)="toggleProfileMenu()">
+                <i class="bi bi-wallet2 me-2"></i>Wallet
+              </a>
+            </li>
+            }
+            @if (isDriver()) {
+            <li><a class="dropdown-item" routerLink="/earnings" (click)="toggleProfileMenu()">
+                <i class="bi bi-cash-stack me-2"></i>Earnings
+              </a>
+            </li>
+            }
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item text-danger" href="#" (click)="$event.preventDefault(); logout()">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+              </a>
+            </li>
+          </ul>
+        </li>
+        }
+      </ul>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,79 @@
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h1>Track Your Shipment</h1>
+        <p class="text-muted">Enter your tracking number below to see the status of your delivery.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="input-group input-group-lg mb-3">
+                <input type="text" class="form-control" placeholder="Enter Tracking Number (e.g., TRK-12345)"
+                    [(ngModel)]="trackingNumber" (keyup.enter)="trackOrder()">
+                <button class="btn btn-primary" type="button" (click)="trackOrder()">Track</button>
+            </div>
+        </div>
+    </div>
+
+    @if (searched && !shipment && errorMessage) {
+    <div class="alert alert-danger text-center mt-4" role="alert">
+        {{ errorMessage }}
+    </div>
+    }
+
+    @if (shipment) {
+    <div class="card mt-5 shadow-sm">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Tracking Details</h5>
+            <span class="badge" [ngClass]="{
+                'bg-primary': shipment.status === 'CREATED',
+                'bg-info': shipment.status === 'PICKED_UP' || shipment.status === 'IN_TRANSIT',
+                'bg-warning': shipment.status === 'OUT_FOR_DELIVERY',
+                'bg-success': shipment.status === 'DELIVERED',
+                'bg-danger': shipment.status === 'CANCELLED'
+            }">{{ shipment.status }}</span>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <p><strong>Tracking Number:</strong> <span class="text-primary">{{ shipment.trackingNumber }}</span>
+                    </p>
+                    <p><strong>Payment Mode:</strong> {{ shipment.paymentMode }}</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p><strong>Last Updated:</strong> {{ shipment.lastUpdated | date:'medium' }}</p>
+                </div>
+            </div>
+
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Sender Details</th>
+                        <th>Receiver Details</th>
+                        <th>Package Info</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div>{{ shipment.senderDetails?.firstName }} {{ shipment.senderDetails?.lastName }}</div>
+                            <div class="text-muted">{{ shipment.senderDetails?.city }}, {{
+                                shipment.senderDetails?.country }}</div>
+                        </td>
+                        <td>
+                            <div>{{ shipment.receiverDetails?.firstName }} {{ shipment.receiverDetails?.lastName }}
+                            </div>
+                            <div class="text-muted">{{ shipment.receiverDetails?.city }}, {{
+                                shipment.receiverDetails?.country }}</div>
+                        </td>
+                        <td>
+                            <div>{{ shipment.packageDetails?.packageCount }}x {{ shipment.packageDetails?.boxType }}
+                            </div>
+                            <div class="text-muted">{{ shipment.packageDetails?.weightKg }} kg</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    }
+</div>

@@ -1,0 +1,100 @@
+<div class="container mt-5">
+    <h2 class="mb-4">My Earnings</h2>
+
+    <div *ngIf="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Loading your earnings data...</p>
+    </div>
+
+    <div *ngIf="!loading">
+        <div class="row g-4 mb-4">
+            <!-- Today's Earnings -->
+            <div class="col-md-4">
+                <div class="card text-white bg-success h-100 shadow-sm">
+                    <div class="card-header border-0 pb-0">Today's Earnings</div>
+                    <div class="card-body">
+                        <h1 class="card-title display-4 fw-bold">{{ todayEarnings | currency:'USD':'symbol':'1.0-2' }}</h1>
+                        <p class="card-text">Great job today!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Earnings -->
+            <div class="col-md-4">
+                <div class="card text-white bg-primary h-100 shadow-sm">
+                    <div class="card-header border-0 pb-0">This Week</div>
+                    <div class="card-body">
+                        <h1 class="card-title display-4 fw-bold">{{ weekEarnings | currency:'USD':'symbol':'1.0-2' }}</h1>
+                        <p class="card-text">Keep up the momentum.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Earnings -->
+            <div class="col-md-4">
+                <div class="card text-white bg-info h-100 shadow-sm">
+                    <div class="card-header border-0 pb-0">This Month</div>
+                    <div class="card-body">
+                        <h1 class="card-title display-4 fw-bold">{{ monthEarnings | currency:'USD':'symbol':'1.0-2' }}</h1>
+                        <p class="card-text">Projected: {{ monthEarnings + 500 | currency:'USD':'symbol':'1.0-2' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Deliveries -->
+            <div class="col-12 mt-3">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body d-flex align-items-center justify-content-between p-4">
+                        <div>
+                            <h4 class="card-title text-muted mb-0 fw-bold">Total Deliveries Completed</h4>
+                            <small class="text-muted">Since joining</small>
+                        </div>
+                        <h2 class="display-5 text-dark fw-bold mb-0">{{ totalDeliveries }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order History -->
+        <h4 class="mb-3 mt-5 fw-bold text-dark">Earnings History</h4>
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 history-table">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="py-3 px-4 border-0">Date & Time</th>
+                            <th class="py-3 px-4 border-0">Tracking Number</th>
+                            <th class="py-3 px-4 border-0">Type</th>
+                            <th class="py-3 px-4 border-0 text-end">Amount Earned</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngIf="history.length === 0">
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                No completed deliveries yet.
+                            </td>
+                        </tr>
+                        <tr *ngFor="let item of history">
+                            <td class="py-3 px-4">
+                                <div class="fw-medium text-dark">{{ item.completedAt | date:'mediumDate' }}</div>
+                                <small class="text-muted">{{ item.completedAt | date:'shortTime' }}</small>
+                            </td>
+                            <td class="py-3 px-4 fw-medium text-primary">#{{ item.trackingNumber }}</td>
+                            <td class="py-3 px-4">
+                                <span class="badge rounded-pill" [ngClass]="item.assignmentType === 'DELIVERY' || item.assignmentType === 'RETURN_DELIVERY' ? 'bg-success' : 'bg-info'">
+                                    {{ item.assignmentType }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-end fw-bold text-success fs-5">
+                                +{{ item.earnedAmount | currency:'USD':'symbol':'1.2-2' }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

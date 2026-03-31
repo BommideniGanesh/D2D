@@ -1,0 +1,57 @@
+<div class="wallet-container fade-in">
+  <div class="header-section">
+    <h2>Corporate Wallet & Invoicing</h2>
+    <p>Manage your B2B payment ledgers and download monthly statements flawlessly.</p>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner-border text-primary" role="status"></div>
+    <span class="ms-2">Encrypting & Loading Ledger...</span>
+  </div>
+
+  <div *ngIf="!loading && wallet">
+    <div class="balance-card glass-panel">
+      <h3>Available Credit Lines</h3>
+      <div class="balance-amount">
+        {{ wallet.balance | currency:wallet.currency }}
+      </div>
+      <!-- <button class="btn btn-action mt-3 shadow-sm" (click)="downloadInvoice()">
+        <i class="bi bi-file-earmark-pdf me-2"></i> Download Statement
+      </button> -->
+    </div>
+
+    <div class="transactions-section glass-panel mt-4">
+      <h3>Recent Real-Time Transactions</h3>
+      <div class="table-responsive mt-3">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Timestamp</th>
+              <th>Description</th>
+              <th>Vector</th>
+              <th class="text-end">Calculation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let txn of wallet.transactions">
+              <td class="text-muted">{{ txn.transactionDate | date:'medium' }}</td>
+              <td class="fw-semibold">{{ txn.description }}</td>
+              <td>
+                <span class="badge"
+                  [ngClass]="txn.transactionType === 'CREDIT' ? 'bg-success-subtle border border-success-subtle text-success' : 'bg-danger-subtle border border-danger-subtle text-danger'">
+                  <i class="bi"
+                    [ngClass]="txn.transactionType === 'CREDIT' ? 'bi-arrow-down-left' : 'bi-arrow-up-right'"></i>
+                  {{ txn.transactionType }}
+                </span>
+              </td>
+              <td class="text-end fw-bold"
+                [ngClass]="txn.transactionType === 'CREDIT' ? 'text-success' : 'text-danger'">
+                {{ txn.transactionType === 'CREDIT' ? '+' : '' }}{{ txn.amount | currency:wallet.currency }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

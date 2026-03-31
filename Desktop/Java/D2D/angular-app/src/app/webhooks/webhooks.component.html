@@ -1,0 +1,62 @@
+<div class="webhooks-container fade-in">
+  <div class="header-section">
+    <h2>Developer API / Webhooks Console</h2>
+    <p>Register endpoints to receive real-time POST events when shipment statuses actively change.</p>
+  </div>
+
+  <div class="glass-panel register-panel mb-4 shadow-lg">
+    <h3><i class="bi bi-broadcast me-2"></i> Add New Webhook Endpoint</h3>
+    <div class="input-group mt-3 position-relative">
+      <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
+      <input type="url" class="form-control" [(ngModel)]="newUrl" placeholder="https://your-domain.com/events">
+      <button class="btn btn-action ms-3" (click)="addWebhook()">Register Tracking Endpoint</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="text-center p-5">
+    <div class="spinner-border text-info shadow"></div>
+    <span class="ms-3 text-muted fw-bold">Querying Active Triggers...</span>
+  </div>
+
+  <div *ngIf="!loading">
+    <div class="glass-panel">
+      <h3>Active Subscriptions</h3>
+      <p class="text-muted small">HMAC SHA256 signatures are securely injected into the <code>X-Signature</code> header.</p>
+      
+      <div class="table-responsive mt-3">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Target URL</th>
+              <th>Secret Key</th>
+              <th>Status</th>
+              <th>Created Segment</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let sub of subscriptions">
+              <td class="fw-semibold text-primary font-monospace small"><i class="bi bi-globe2 me-2"></i>{{ sub.targetUrl }}</td>
+              <td><span class="secret-chip">{{ sub.secretKey }}</span></td>
+              <td>
+                <span class="badge" [ngClass]="sub.isActive ? 'bg-success-subtle border border-success-subtle text-success' : 'bg-warning-subtle text-warning'">
+                  <i class="bi bi-check-circle me-1" *ngIf="sub.isActive"></i> 
+                  {{ sub.isActive ? 'Active' : 'Disabled' }}
+                </span>
+              </td>
+              <td class="text-muted small">{{ sub.createdAt | date:'short' }}</td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-danger shadow-sm border-0" (click)="deleteWebhook(sub.id)">
+                  <i class="bi bi-trash-fill"></i> Revoke
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="subscriptions.length === 0">
+              <td colspan="5" class="text-center text-muted p-4">You have no active webhooks configured for this client scope.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

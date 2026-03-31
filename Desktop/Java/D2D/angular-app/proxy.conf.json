@@ -1,0 +1,13 @@
+{
+  "/nyc-api": {
+    "target": "https://data.cityofnewyork.us",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/nyc-api": ""
+    },
+    "headers": {
+      "host": "data.cityofnewyork.us"
+    }
+  }
+}

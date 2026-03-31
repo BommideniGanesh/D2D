@@ -1,0 +1,88 @@
+<div class="op-chat-wrapper d-flex h-100">
+
+  <!-- Sidebar: Contact list -->
+  <div class="contacts-panel d-flex flex-column">
+    <div class="contacts-header px-3 py-3">
+      <h6 class="fw-bold text-white mb-0"><i class="bi bi-people-fill me-2 text-info"></i>Active Conversations</h6>
+    </div>
+    <div class="contacts-list flex-grow-1 overflow-auto">
+      @if (isLoadingContacts) {
+        <div class="text-center text-muted py-4 small">Loading...</div>
+      }
+      @if (!isLoadingContacts && contacts.length === 0) {
+        <div class="text-center text-muted py-4 small px-3">
+          <i class="bi bi-inbox fs-3 d-block mb-1 opacity-50"></i> No conversations yet.
+        </div>
+      }
+      @for (contact of contacts; track contact) {
+        <div class="contact-item d-flex align-items-center gap-3 px-3 py-3"
+             [class.active]="selectedContact === contact"
+             (click)="selectContact(contact)">
+          <div class="avatar-contact">{{ getInitial(contact) }}</div>
+          <div class="overflow-hidden">
+            <p class="mb-0 fw-semibold contact-name text-truncate">{{ contact }}</p>
+            <small class="text-muted">Click to view chat</small>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Chat Panel -->
+  <div class="chat-panel d-flex flex-column flex-grow-1">
+    @if (!selectedContact) {
+      <div class="empty-state d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+        <i class="bi bi-chat-left-dots-fill fs-1 mb-3 text-info opacity-50"></i>
+        <h5 class="fw-semibold">Select a conversation</h5>
+        <p class="small">Pick a user from the left panel to start replying.</p>
+      </div>
+    }
+
+    @if (selectedContact) {
+      <!-- Chat Header -->
+      <div class="chat-header-op d-flex align-items-center gap-3 px-4 py-3">
+        <div class="avatar-contact">{{ getInitial(selectedContact) }}</div>
+        <div>
+          <p class="mb-0 fw-bold">{{ selectedContact }}</p>
+          <small class="text-success"><i class="bi bi-circle-fill me-1" style="font-size:0.5rem;"></i>Active</small>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="chat-body-op flex-grow-1 p-4 overflow-auto" #chatBody>
+        @if (isLoadingMessages) {
+          <div class="text-center py-5 text-muted">
+            <div class="spinner-border spinner-border-sm text-info me-2"></div> Loading...
+          </div>
+        }
+        @for (msg of messages; track msg.id) {
+          <div class="d-flex mb-3" [class.justify-content-end]="msg.senderId !== selectedContact">
+            @if (msg.senderId === selectedContact) {
+              <div class="avatar-sm-op me-2">{{ getInitial(msg.senderId) }}</div>
+            }
+            <div class="bubble-op"
+                 [class.bubble-op-agent]="msg.senderId !== selectedContact"
+                 [class.bubble-op-user]="msg.senderId === selectedContact">
+              <p class="mb-1">{{ msg.content }}</p>
+              <small class="opacity-60">{{ msg.timestamp | date:'shortTime' }}</small>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Reply Input -->
+      <div class="chat-footer-op d-flex gap-2 px-4 py-3">
+        <input
+          type="text"
+          class="form-control chat-input-op"
+          placeholder="Type your reply..."
+          [(ngModel)]="newMessage"
+          (keyup.enter)="sendReply()"
+        />
+        <button class="btn btn-info text-white px-4" (click)="sendReply()" [disabled]="!newMessage.trim()">
+          <i class="bi bi-send-fill"></i>
+        </button>
+      </div>
+    }
+  </div>
+</div>

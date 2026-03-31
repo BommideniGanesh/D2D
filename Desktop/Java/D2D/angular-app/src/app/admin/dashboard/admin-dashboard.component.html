@@ -1,0 +1,291 @@
+<div class="container-fluid py-4">
+    <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Admin Dashboard</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <button type="button" class="btn btn-sm btn-outline-primary" (click)="fetchDashboardData()">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Gathering analytics...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error" class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+
+    <div *ngIf="!loading && !error && dashboardData">
+        <!-- Key Metrics Cards -->
+        <div class="row g-4 mb-4">
+            <!-- Total Users -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-white shadow-sm h-100 border-start border-4 border-primary" style="cursor: pointer;" (click)="openDetailsModal('USERS')">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Active Users
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ dashboardData.totalUsers }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-people fs-2 text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delivered Orders -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-white shadow-sm h-100 border-start border-4 border-success" style="cursor: pointer;" (click)="openDetailsModal('DELIVERED')">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Delivered Orders
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{
+                                    dashboardData.totalDeliveredOrders }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-box-seam fs-2 text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Drivers -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-white shadow-sm h-100 border-start border-4 border-info" style="cursor: pointer;" (click)="openDetailsModal('DRIVERS')">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Active Drivers</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ dashboardData.activeDrivers }}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-truck fs-2 text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-white shadow-sm h-100 border-start border-4 border-warning">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Total Revenue
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ dashboardData.revenue | currency
+                                    }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-currency-dollar fs-2 text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Secondary Metrics Row -->
+        <div class="row g-4 mb-4">
+            <!-- Damaged / Returned Orders -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-white shadow-sm h-100 border-start border-4 border-danger" style="cursor: pointer;" (click)="openDetailsModal('DAMAGED')">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Damaged / Returns
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ dashboardData.totalDamagedOrders }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-exclamation-triangle fs-2 text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Weekly Orders Chart -->
+            <div class="col-lg-8 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Orders Overview (Last 7 Days)</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <div class="bar-group" *ngFor="let day of dashboardData.ordersGraphData">
+                                <div class="bar-count text-muted small">{{ day.orders > 0 ? day.orders : '' }}</div>
+                                <div class="bar" [style.height]="getBarHeight(day.orders)"
+                                    [title]="day.orders + ' orders'"></div>
+                                <div class="bar-label">{{ day.date | date:'EEE' }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Driver Availability Stats -->
+            <div class="col-lg-4 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Driver Status</h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Available
+                                <span class="badge bg-success rounded-pill">{{
+                                    dashboardData.driverStatusStats['Available'] }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Busy
+                                <span class="badge bg-warning text-dark rounded-pill">{{
+                                    dashboardData.driverStatusStats['Busy'] }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Offline
+                                <span class="badge bg-secondary rounded-pill">{{
+                                    dashboardData.driverStatusStats['Offline'] }}</span>
+                            </li>
+                        </ul>
+                        <div class="mt-4 text-center">
+                            <small class="text-muted">Real-time driver availability tracking</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div *ngIf="activeModalType" class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title">
+                        <ng-container *ngIf="activeModalType === 'USERS'">Active Users</ng-container>
+                        <ng-container *ngIf="activeModalType === 'DRIVERS'">Active Drivers</ng-container>
+                        <ng-container *ngIf="activeModalType === 'DELIVERED'">Delivered Orders</ng-container>
+                        <ng-container *ngIf="activeModalType === 'DAMAGED'">Damaged / Returned Orders</ng-container>
+                    </h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div *ngIf="isModalLoading" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    
+                    <div *ngIf="!isModalLoading && modalData.length === 0" class="text-muted text-center py-4">
+                        No records found.
+                    </div>
+
+                    <div *ngIf="!isModalLoading && modalData.length > 0" class="table-responsive">
+                        <!-- Users Table -->
+                        <table *ngIf="activeModalType === 'USERS'" class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Username/Email</th>
+                                    <th>Phone Number</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let user of modalData">
+                                    <td class="fw-semibold">{{ user.name }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.phone }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Drivers Table -->
+                        <table *ngIf="activeModalType === 'DRIVERS'" class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Phone Number</th>
+                                    <th>Vehicle</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let driver of modalData">
+                                    <td class="fw-semibold">{{ driver.firstName }} {{ driver.lastName }}</td>
+                                    <td>{{ driver.phoneNumber }}</td>
+                                    <td>
+                                      <div>{{ driver.vehicleType }} - {{ driver.vehicleNumber }}</div>
+                                      <div class="small text-muted" *ngIf="driver.vehicleModel">{{ driver.vehicleModel }}</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Delivered Orders Table -->
+                        <table *ngIf="activeModalType === 'DELIVERED'" class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tracking #</th>
+                                    <th>Sender</th>
+                                    <th>Receiver</th>
+                                    <th>Total Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let order of modalData">
+                                    <td class="fw-bold text-primary">{{ order.trackingNumber }}</td>
+                                    <td>{{ order.sender?.firstName }} {{ order.sender?.lastName }}</td>
+                                    <td>{{ order.receiver?.firstName }} {{ order.receiver?.lastName }}</td>
+                                    <td>{{ order.totalAmount | currency:order.currency }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Damaged/Returns Table -->
+                        <table *ngIf="activeModalType === 'DAMAGED'" class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tracking #</th>
+                                    <th>Status</th>
+                                    <th>Issue Description / Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let order of modalData">
+                                    <td class="fw-bold text-danger">{{ order.trackingNumber }}</td>
+                                    <td><span class="badge bg-danger">{{ order.status }}</span></td>
+                                    <td>
+                                      <div class="small fw-semibold mb-1 text-muted">Latest History:</div>
+                                      <ul class="list-unstyled small mb-0">
+                                        <li *ngFor="let h of order.history">
+                                          <span *ngIf="h.notes">{{ h.notes }}</span>
+                                        </li>
+                                      </ul>
+                                      <em class="small text-muted" *ngIf="!order.history || order.history.length === 0">No detailed history provided.</em>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

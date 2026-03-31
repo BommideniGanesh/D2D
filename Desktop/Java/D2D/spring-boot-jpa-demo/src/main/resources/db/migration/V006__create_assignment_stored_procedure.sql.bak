@@ -1,0 +1,76 @@
+-- =====================================================
+-- Stored Procedure: Assign Orders to Drivers
+-- =====================================================
+-- This procedure assigns 'CREATED' shipments to 'AVAILABLE' drivers
+-- based on matching pincode (either primary pincode or service area).
+-- It limits the number of assignments per run to avoid locking too many rows.
+-- Drop procedure if exists to avoid errors on rerun
+DROP PROCEDURE IF EXISTS assign_orders_to_drivers_proc;
+DELIMITER $$ CREATE PROCEDURE assign_orders_to_drivers_proc(IN batch_size INT) BEGIN -- Declare variables
+DECLARE done INT DEFAULT FALSE;
+DECLARE v_shipment_id BIGINT;
+DECLARE v_driver_id BIGINT;
+-- Cursor to find unassigned shipments and matching drivers
+-- We join shipments with sender_details to get the pickup pincode
+-- Then join driver_profiles (d) and driver_service_areas (sa) to find a match
+DECLARE assignment_cursor CURSOR FOR
+SELECT s.id,
+    d.id
+FROM shipments s
+    JOIN sender_details sd ON s.sender_id = sd.id
+    JOIN driver_profiles d ON d.availability_status = 'AVAILABLE'
+    AND d.is_active = TRUE
+    AND d.is_verified = TRUE
+    LEFT JOIN driver_service_areas sa ON d.id = sa.driver_id
+WHERE s.status = 'CREATED'
+    AND (
+        d.pincode = sd.postal_code
+        OR sa.pincode = sd.postal_code
+    )
+ORDER BY s.created_at ASC
+LIMIT batch_size;
+DECLARE CONTINUE HANDLER FOR NOT FOUND
+SET done = TRUE;
+-- Start Transaction
+START TRANSACTION;
+OPEN assignment_cursor;
+read_loop: LOOP FETCH assignment_cursor INTO v_shipment_id,
+v_driver_id;
+IF done THEN LEAVE read_loop;
+END IF;
+-- Double check if shipment is still CREATED (concurrency safety)
+IF EXISTS (
+    SELECT 1
+    FROM shipments
+    WHERE id = v_shipment_id
+        AND status = 'CREATED'
+) THEN -- 1. Create Assignment Record
+INSERT INTO shipment_driver_assignments (
+        shipment_id,
+        driver_id,
+        assignment_type,
+        status,
+        assigned_at
+    )
+VALUES (
+        v_shipment_id,
+        v_driver_id,
+        'PICKUP',
+        'ASSIGNED',
+        NOW()
+    );
+-- 2. Update Shipment Status
+UPDATE shipments
+SET status = 'PICKUP_ASSIGNED'
+WHERE id = v_shipment_id;
+-- 3. Update Driver Status
+UPDATE driver_profiles
+SET availability_status = 'ON_DELIVERY'
+WHERE id = v_driver_id;
+END IF;
+END LOOP;
+CLOSE assignment_cursor;
+COMMIT;
+-- Optional: Return count of assignments (select count or just log)
+SELECT 1;
+END $$ DELIMITER;

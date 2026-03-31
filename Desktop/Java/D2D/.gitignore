@@ -1,0 +1,44 @@
+# Build outputs
+target/
+build/
+dist/
+.angular/
+
+# Dependencies
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+
+# Environment
+.env
+
+# Temp/test output files
+out*.json
+
+# Uploads (binary data)
+uploads/
+
+# Seeder data
+seeder/
+
+# Forex bot (unrelated)
+forex-mt5-bot/
+
+# Root pom
+pom.xml

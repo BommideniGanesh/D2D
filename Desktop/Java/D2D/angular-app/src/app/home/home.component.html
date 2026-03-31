@@ -1,0 +1,145 @@
+<div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        <div class="carousel-item" *ngFor="let img of images; let i = index" [class.active]="i === 0"
+            data-bs-interval="5000">
+            <img [src]="img" class="d-block w-100" alt="Slide {{i + 1}}" style="max-height: 500px; object-fit: cover;">
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+
+<!-- Tracking Section -->
+<section id="tracking" class="py-5" style="background-color: #f8f9fa;">
+    <div class="container my-5 text-center">
+        <h2 class="fw-bold display-6 mb-4">Swift & Secure Tracking</h2>
+        <p class="lead text-muted mb-5">Instantly locate your package with real-time updates.</p>
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow-lg border-0 rounded-4">
+                    <div class="card-body p-4 p-md-5 bg-white rounded-4">
+                        <app-tracking></app-tracking>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Reviews / Testimonials Section -->
+<section id="reviews" class="py-5 bg-light">
+    <div class="container my-5">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="fw-bold display-5 text-dark">What Our Customers Say</h2>
+                <p class="lead text-muted">Real stories from businesses and people who rely on us.</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Review 1 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm review-card"
+                    style="transition: transform 0.3s; border-radius: 12px;">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="d-flex text-warning mb-3">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                        <p class="fs-5 flex-grow-1 text-secondary fst-italic">
+                            "Absolutely seamless delivery. D2D completely transformed how we get our packages across
+                            town. Fast and reliable."
+                        </p>
+                        <div class="d-flex align-items-center mt-4">
+                            <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center fw-bold fs-5 me-3"
+                                style="width: 50px; height: 50px;">
+                                SW
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Sarah Williams</h6>
+                                <small class="text-muted">Small Business Owner</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review 2 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm review-card"
+                    style="transition: transform 0.3s; border-radius: 12px; transform: scale(1.05); z-index: 1;">
+                    <div
+                        class="card-body p-4 d-flex flex-column bg-white border border-primary border-opacity-25 rounded-3">
+                        <div class="d-flex text-warning mb-3">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                        <p class="fs-5 flex-grow-1 text-secondary fst-italic">
+                            "The tracking is highly accurate and the drivers are very professional. Best logistics
+                            service I've used so far."
+                        </p>
+                        <div class="d-flex align-items-center mt-4">
+                            <div class="bg-success text-white rounded-circle d-flex justify-content-center align-items-center fw-bold fs-5 me-3"
+                                style="width: 50px; height: 50px;">
+                                MR
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Michael Ross</h6>
+                                <small class="text-muted">E-commerce Manager</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review 3 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm review-card"
+                    style="transition: transform 0.3s; border-radius: 12px;">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="d-flex text-warning mb-3">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-half"></i>
+                        </div>
+                        <p class="fs-5 flex-grow-1 text-secondary fst-italic">
+                            "Great prices and an intuitive platform. My go-to choice every time I need to send something
+                            urgently."
+                        </p>
+                        <div class="d-flex align-items-center mt-4">
+                            <div class="bg-info text-white rounded-circle d-flex justify-content-center align-items-center fw-bold fs-5 me-3"
+                                style="width: 50px; height: 50px;">
+                                JL
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Jessica Lee</h6>
+                                <small class="text-muted">Freelance Artist</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+<style>
+    .review-card:hover {
+        transform: translateY(-10px) !important;
+        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+    }
+</style>

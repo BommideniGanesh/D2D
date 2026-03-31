@@ -1,0 +1,48 @@
+<div class="tracking-container fade-in">
+  <div class="glass-map-panel">
+    
+    <div class="map-header d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="mb-1"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Live Fleet Radar</h2>
+        <p class="text-muted mb-0">Watching Route Protocol: <strong>#{{ shipmentId }}</strong></p>
+      </div>
+      <div>
+        <span class="status-indicator" [ngClass]="{
+          'live': connectionStatus === 'CONNECTED (LIVE)',
+          'connecting': connectionStatus === 'CONNECTING...',
+          'offline': connectionStatus.includes('DISCONNECTED') || connectionStatus.includes('ERROR')
+        }"></span>
+        <span class="fw-bold fs-5">{{ connectionStatus }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="connectionError" class="alert alert-danger mt-3 shadow-sm border-0">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ connectionError }}
+    </div>
+
+    <!-- Map Visualization Container -->
+    <div class="radar-viewport mt-4 position-relative">
+      
+      <!-- Visual map overlay simulation -->
+      <div class="grid-overlay"></div>
+      
+      <!-- Pulsing Driver Icon binding seamlessly to Class variables -->
+      <div class="driver-marker" [style]="'left: 50%; top: 50%;'">
+        <div class="pulse-ring"></div>
+        <i class="bi bi-truck vehicle-icon shadow-lg"></i>
+        <div class="coord-label shadow">
+          Lat: {{ latitude | number:'1.4-4' }}<br>
+          Lon: {{ longitude | number:'1.4-4' }}
+        </div>
+      </div>
+      
+    </div>
+
+    <div class="footer-stats mt-4 d-flex justify-content-between text-muted small">
+      <div><i class="bi bi-broadcast me-1 text-info"></i> Powered globally by Spring Framework STOMP WebSockets</div>
+      <div *ngIf="pingedAt">Last Signal Received: <span class="fw-bold text-dark">{{ pingedAt | date:'mediumTime' }}</span></div>
+      <div *ngIf="!pingedAt">Waiting for driver coordinates...</div>
+    </div>
+
+  </div>
+</div>

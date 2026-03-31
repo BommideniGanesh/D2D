@@ -1,0 +1,422 @@
+<div class="container my-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>My Orders</h2>
+    <button class="btn btn-primary" routerLink="/create-order">
+      <i class="bi bi-plus-lg"></i> New Order
+    </button>
+  </div>
+
+  @if (shipments.length === 0) {
+  <div class="alert alert-info text-center" role="alert">
+    You haven't placed any orders yet.
+  </div>
+  } @else {
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Tracking Number</th>
+          <th scope="col">Status</th>
+          <th scope="col">Sender</th>
+          <th scope="col">Receiver</th>
+          <th scope="col">Amount</th>
+          <th scope="col">Date</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (shipment of shipments; track shipment.id) {
+        <tr>
+          <td>
+            <span class="fw-bold text-primary">{{ shipment.trackingNumber }}</span>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="{
+                            'bg-primary text-white': shipment.status === 'CREATED',
+                            'bg-secondary text-white': shipment.status === 'PICKUP_ASSIGNED',
+                            'bg-info text-white': shipment.status === 'PICKED_UP' || shipment.status === 'IN_TRANSIT',
+                            'bg-warning text-dark': shipment.status === 'OUT_FOR_DELIVERY',
+                            'bg-success text-white': shipment.status === 'DELIVERED',
+                            'bg-danger text-white': shipment.status === 'CANCELLED' || shipment.status === 'RETURN_REQUESTED'
+                        }">{{ shipment.status }}</span>
+          </td>
+          <td>
+            <div class="fw-semibold">{{ shipment.senderDetails?.firstName }}
+              {{ shipment.senderDetails?.lastName }}</div>
+            <div class="small text-muted">{{ shipment.senderDetails?.city }}</div>
+          </td>
+          <td>
+            <div class="fw-semibold">{{ shipment.receiverDetails?.firstName }}
+              {{ shipment.receiverDetails?.lastName }}</div>
+            <div class="small text-muted">{{ shipment.receiverDetails?.city }}</div>
+          </td>
+          <td>
+            {{ shipment.totalAmount | currency:shipment.currency }}
+          </td>
+          <td>
+            {{ shipment.createdAt | date:'mediumDate' }}
+          </td>
+          <td>
+            <div class="d-flex flex-wrap gap-1">
+              <button class="btn btn-sm btn-outline-secondary" title="View Details" (click)="openDetails(shipment)">
+                <i class="bi bi-eye"></i> Details
+              </button>
+              @if (shipment.status !== 'DELIVERED' && shipment.status !== 'CANCELLED' && !isPaymentPaid(shipment)) {
+              <button class="btn btn-sm btn-success" title="Pay Now" (click)="openPaymentModal(shipment)">
+                <i class="bi bi-credit-card"></i> Pay
+              </button>
+              }
+              @if (isPaymentPaid(shipment)) {
+              <span class="badge bg-success text-white align-self-center"><i class="bi bi-check-circle me-1"></i>Paid</span>
+              }
+              @if (shipment.status === 'DELIVERED') {
+              <button class="btn btn-sm btn-outline-danger" title="Report Issue" (click)="openIssueModal(shipment)">
+                <i class="bi bi-exclamation-circle"></i> Report
+              </button>
+              @if (!isRated(shipment)) {
+              <button class="btn btn-sm btn-outline-warning" title="Rate Delivery" (click)="openRatingModal(shipment)">
+                <i class="bi bi-star"></i> Rate
+              </button>
+              } @else {
+              <span class="badge bg-warning text-dark align-self-center">
+                <i class="bi bi-star-fill me-1"></i>{{ shipmentRatings[shipment.id!] }}/5
+              </span>
+              }
+              }
+            </div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
+
+  <!-- Order Details Modal -->
+  @if (selectedShipment) {
+  <div class="modal fade show d-block" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-modal="true"
+    role="dialog" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header bg-light d-flex justify-content-between align-items-center">
+          <h5 class="modal-title mb-0" id="orderDetailsModalLabel">
+            Order Details <span class="text-primary">#{{ selectedShipment.trackingNumber || 'N/A' }}</span>
+          </h5>
+          <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-sm btn-outline-primary fw-bold" (click)="downloadInvoice(selectedShipment)">
+              <i class="bi bi-file-earmark-pdf-fill me-1"></i> Download Invoice
+            </button>
+            <button type="button" class="btn-close" aria-label="Close" (click)="closeDetails()"></button>
+          </div>
+        </div>
+        <div class="modal-body p-4">
+          <div class="row g-4 mb-4">
+            <div class="col-md-6">
+              <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                  <h6 class="card-subtitle mb-3 text-muted">Status & Delivery</h6>
+                  <div class="mb-2">
+                    <span class="badge" [ngClass]="{
+                                            'bg-primary text-white': selectedShipment.status === 'CREATED',
+                                            'bg-secondary text-white': selectedShipment.status === 'PICKUP_ASSIGNED',
+                                            'bg-info text-white': selectedShipment.status === 'PICKED_UP' || selectedShipment.status === 'IN_TRANSIT',
+                                            'bg-warning text-dark': selectedShipment.status === 'OUT_FOR_DELIVERY',
+                                            'bg-success text-white': selectedShipment.status === 'DELIVERED',
+                                            'bg-danger text-white': selectedShipment.status === 'CANCELLED' || selectedShipment.status === 'RETURN_REQUESTED'
+                                        }">{{ selectedShipment.status }}</span>
+                  </div>
+                  <div class="text-muted small"><strong>Created:</strong> {{
+                    selectedShipment.createdAt | date:'medium' }}</div>
+                  @if(selectedShipment.updatedAt) {
+                  <div class="text-muted small"><strong>Last Updated:</strong> {{
+                    selectedShipment.updatedAt | date:'medium' }}</div>
+                  }
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                  <h6 class="card-subtitle mb-3 text-muted">Cost & Payment</h6>
+                  <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">Base Cost:</span>
+                    <span>{{ selectedShipment.baseShippingCost | currency:selectedShipment.currency
+                      }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">Tax:</span>
+                    <span>{{ selectedShipment.taxAmount | currency:selectedShipment.currency
+                      }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">Insurance:</span>
+                    <span>{{ selectedShipment.insuranceAmount | currency:selectedShipment.currency
+                      }}</span>
+                  </div>
+                  <hr class="my-2">
+                  <div class="d-flex justify-content-between fw-bold">
+                    <span>Total:</span>
+                    <span class="text-primary">{{ selectedShipment.totalAmount |
+                      currency:selectedShipment.currency }}</span>
+                  </div>
+                  <div class="mt-2 text-muted small"><strong>Payment Mode:</strong> {{
+                    selectedShipment.paymentMode }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-4 mb-4">
+            <div class="col-md-6">
+              <h6 class="text-uppercase text-muted fs-7 fw-bold mb-3">Sender Details</h6>
+              <div class="bg-light p-3 rounded">
+                <p class="mb-1 fw-semibold">{{ selectedShipment.senderDetails?.firstName }} {{
+                  selectedShipment.senderDetails?.lastName }}</p>
+                @if(selectedShipment.senderDetails?.company) {
+                <p class="mb-1 text-muted small">{{ selectedShipment.senderDetails?.company }}</p>
+                }
+                <p class="mb-1 small">{{ selectedShipment.senderDetails?.addressLine1 }}</p>
+                @if(selectedShipment.senderDetails?.addressLine2) {
+                <p class="mb-1 small">{{ selectedShipment.senderDetails?.addressLine2 }}</p>
+                }
+                <p class="mb-1 small">{{ selectedShipment.senderDetails?.city }}, {{
+                  selectedShipment.senderDetails?.state }} {{ selectedShipment.senderDetails?.zipCode
+                  }}</p>
+                <p class="mb-0 small">{{ selectedShipment.senderDetails?.country }}</p>
+                <hr class="my-2">
+                <p class="mb-1 small"><i class="bi bi-envelope me-2"></i>{{
+                  selectedShipment.senderDetails?.email }}</p>
+                <p class="mb-0 small"><i class="bi bi-telephone me-2"></i>{{
+                  selectedShipment.senderDetails?.phone }}</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <h6 class="text-uppercase text-muted fs-7 fw-bold mb-3">Receiver Details</h6>
+              <div class="bg-light p-3 rounded">
+                <p class="mb-1 fw-semibold">{{ selectedShipment.receiverDetails?.firstName }} {{
+                  selectedShipment.receiverDetails?.lastName }}</p>
+                @if(selectedShipment.receiverDetails?.company) {
+                <p class="mb-1 text-muted small">{{ selectedShipment.receiverDetails?.company }}</p>
+                }
+                <p class="mb-1 small">{{ selectedShipment.receiverDetails?.addressLine1 }}</p>
+                @if(selectedShipment.receiverDetails?.addressLine2) {
+                <p class="mb-1 small">{{ selectedShipment.receiverDetails?.addressLine2 }}</p>
+                }
+                <p class="mb-1 small">{{ selectedShipment.receiverDetails?.city }}, {{
+                  selectedShipment.receiverDetails?.state }} {{
+                  selectedShipment.receiverDetails?.zipCode }}</p>
+                <p class="mb-0 small">{{ selectedShipment.receiverDetails?.country }}</p>
+                <hr class="my-2">
+                <p class="mb-1 small"><i class="bi bi-envelope me-2"></i>{{
+                  selectedShipment.receiverDetails?.email }}</p>
+                <p class="mb-0 small"><i class="bi bi-telephone me-2"></i>{{
+                  selectedShipment.receiverDetails?.phone }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h6 class="text-uppercase text-muted fs-7 fw-bold mb-3">Package Content</h6>
+            <div class="bg-light p-3 rounded d-flex flex-wrap gap-4">
+              <div>
+                <div class="text-muted small">Type</div>
+                <div class="fw-semibold">{{ selectedShipment.packageDetails?.packageType || 'Standard'
+                  }}</div>
+              </div>
+              <div>
+                <div class="text-muted small">Weight</div>
+                <div class="fw-semibold">{{ selectedShipment.packageDetails?.weight || 0 }} {{
+                  selectedShipment.packageDetails?.weightUnit || 'kg' }}</div>
+              </div>
+              <div>
+                <div class="text-muted small">Dimensions</div>
+                <div class="fw-semibold">{{ selectedShipment.packageDetails?.length || 0 }}x{{
+                  selectedShipment.packageDetails?.width || 0 }}x{{
+                  selectedShipment.packageDetails?.height || 0 }} {{
+                  selectedShipment.packageDetails?.dimensionUnit || 'cm' }}</div>
+              </div>
+              @if(selectedShipment.packageDetails?.declaredValue) {
+              <div>
+                <div class="text-muted small">Declared Value</div>
+                <div class="fw-semibold">{{ selectedShipment.packageDetails?.declaredValue |
+                  currency:selectedShipment.currency }}</div>
+              </div>
+              }
+            </div>
+            @if(selectedShipment.packageDetails?.description) {
+            <div class="mt-3">
+              <div class="text-muted small mb-1">Description</div>
+              <p class="small mb-0">{{ selectedShipment.packageDetails?.description }}</p>
+            </div>
+            }
+          </div>
+
+          @if(selectedShipment.history && selectedShipment.history.length > 0) {
+          <div class="mt-4">
+            <h6 class="text-uppercase text-muted fs-7 fw-bold mb-3">Audit Log</h6>
+            <ul class="list-group list-group-flush small">
+              @for(entry of selectedShipment.history; track entry.timestamp) {
+              <li class="list-group-item bg-transparent px-0">
+                <div class="d-flex justify-content-between">
+                  <strong>{{ entry.action || entry.status }}</strong>
+                  <span class="text-muted">{{ entry.timestamp | date:'short' }}</span>
+                </div>
+                @if(entry.notes) {
+                <div class="text-muted">{{ entry.notes }}</div>
+                }
+              </li>
+              }
+            </ul>
+          </div>
+          }
+        </div>
+        <div class="modal-footer border-top-0 pt-0">
+          <button type="button" class="btn btn-secondary w-100" (click)="closeDetails()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Report Issue Modal -->
+  @if (showIssueModal && issueShipment) {
+  <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header border-bottom-0 bg-danger bg-opacity-10 text-danger">
+          <h5 class="modal-title fw-bold">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> Report Issue
+          </h5>
+          <button type="button" class="btn-close" (click)="closeIssueModal()"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="text-muted small mb-4">Please provide details regarding the issue with your shipment <strong
+              class="text-dark">#{{ issueShipment.trackingNumber }}</strong>.</p>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-secondary small">Reason</label>
+            <select class="form-select border-0 bg-light" [(ngModel)]="issueReason">
+              <option value="Damage">Package Damaged</option>
+              <option value="Wrong Item">Received Wrong Item</option>
+              <option value="Missing Item">Missing Item</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold text-secondary small">Description</label>
+            <textarea class="form-control border-0 bg-light" rows="4" placeholder="Describe the issue in detail..."
+              [(ngModel)]="issueDescription"></textarea>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="button" class="btn btn-danger py-2 fw-bold" (click)="submitIssue()"
+              [disabled]="isSubmittingIssue">
+              <span *ngIf="isSubmittingIssue" class="spinner-border spinner-border-sm me-2"></span>
+              Submit Request
+            </button>
+            <button type="button" class="btn btn-light py-2" (click)="closeIssueModal()"
+              [disabled]="isSubmittingIssue">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Payment Modal -->
+  @if (showPaymentModal && paymentShipment) {
+  <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header border-bottom-0 bg-success bg-opacity-10 text-success">
+          <h5 class="modal-title fw-bold">
+            <i class="bi bi-credit-card-fill me-2"></i>Payment
+          </h5>
+          <button type="button" class="btn-close" (click)="closePaymentModal()"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="text-muted small mb-3">
+            Paying for order <strong class="text-dark">#{{ paymentShipment.trackingNumber }}</strong>
+          </p>
+          <div class="d-flex justify-content-between fw-bold fs-5 mb-4">
+            <span>Total Due:</span>
+            <span class="text-success">{{ paymentShipment.totalAmount | currency:paymentShipment.currency }}</span>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold text-secondary small">Payment Method</label>
+            <div class="d-flex gap-2">
+              @for (method of ['CARD','CASH','WALLET']; track method) {
+              <button type="button" class="btn flex-fill"
+                [class.btn-success]="paymentMethod === method"
+                [class.btn-outline-secondary]="paymentMethod !== method"
+                (click)="paymentMethod = method">
+                <i class="bi me-1"
+                  [class.bi-credit-card]="method==='CARD'"
+                  [class.bi-cash]="method==='CASH'"
+                  [class.bi-wallet2]="method==='WALLET'"></i>
+                {{ method }}
+              </button>
+              }
+            </div>
+          </div>
+          <div class="d-grid gap-2">
+            <button type="button" class="btn btn-success py-2 fw-bold" (click)="initiateAndConfirmPayment()"
+              [disabled]="isProcessingPayment">
+              <span *ngIf="isProcessingPayment" class="spinner-border spinner-border-sm me-2"></span>
+              Confirm Payment
+            </button>
+            <button type="button" class="btn btn-light py-2" (click)="closePaymentModal()"
+              [disabled]="isProcessingPayment">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Rate Delivery Modal -->
+  @if (showRatingModal && ratingShipment) {
+  <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header border-bottom-0 bg-warning bg-opacity-10">
+          <h5 class="modal-title fw-bold text-warning">
+            <i class="bi bi-star-fill me-2"></i>Rate Delivery
+          </h5>
+          <button type="button" class="btn-close" (click)="closeRatingModal()"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="text-muted small mb-3">
+            How was your delivery for order <strong class="text-dark">#{{ ratingShipment.trackingNumber }}</strong>?
+          </p>
+          <div class="d-flex justify-content-center gap-2 mb-4">
+            @for (star of starsArray(); track star) {
+            <button type="button" class="btn btn-link fs-2 p-0" (click)="setRating(star)"
+              style="line-height: 1; text-decoration: none;">
+              <i class="bi" [class.bi-star-fill]="star <= ratingValue" [class.bi-star]="star > ratingValue"
+                [style.color]="star <= ratingValue ? '#f59e0b' : '#d1d5db'"></i>
+            </button>
+            }
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold text-secondary small">Comment (Optional)</label>
+            <textarea class="form-control border-0 bg-light" rows="3" placeholder="Share your experience..."
+              [(ngModel)]="ratingComment"></textarea>
+          </div>
+          <div class="d-grid gap-2">
+            <button type="button" class="btn btn-warning py-2 fw-bold text-dark" (click)="submitRating()"
+              [disabled]="isSubmittingRating || ratingValue === 0">
+              <span *ngIf="isSubmittingRating" class="spinner-border spinner-border-sm me-2"></span>
+              Submit Rating
+            </button>
+            <button type="button" class="btn btn-light py-2" (click)="closeRatingModal()"
+              [disabled]="isSubmittingRating">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+</div>

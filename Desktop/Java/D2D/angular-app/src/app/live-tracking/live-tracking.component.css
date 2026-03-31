@@ -1,0 +1,117 @@
+.tracking-container {
+  padding: 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+  color: #1e293b;
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.glass-map-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  padding: 3rem;
+}
+
+.map-header h2 {
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+.live { background-color: #10b981; box-shadow: 0 0 15px #10b981; animation: blink 1.5s infinite; }
+.connecting { background-color: #f59e0b; }
+.offline { background-color: #ef4444; }
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.radar-viewport {
+  background: #0f172a;
+  height: 550px;
+  border-radius: 20px;
+  border: 6px solid #1e293b;
+  overflow: hidden;
+  box-shadow: inset 0 0 80px rgba(0,0,0,0.8);
+}
+
+.grid-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+.driver-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  transition: all 0.5s ease-out; 
+}
+
+.pulse-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70px; height: 70px;
+  background-color: rgba(56, 189, 248, 0.35);
+  border-radius: 50%;
+  animation: radar-pulse 2s infinite ease-out;
+  z-index: 1;
+}
+
+@keyframes radar-pulse {
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+}
+
+.vehicle-icon {
+  position: relative;
+  z-index: 2;
+  font-size: 2.5rem;
+  color: #38bdf8;
+  background: #0f172a;
+  padding: 0.6rem;
+  border-radius: 50%;
+  border: 4px solid #38bdf8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.coord-label {
+  position: absolute;
+  top: -55px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.9);
+  color: #38bdf8;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  font-weight: bold;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
