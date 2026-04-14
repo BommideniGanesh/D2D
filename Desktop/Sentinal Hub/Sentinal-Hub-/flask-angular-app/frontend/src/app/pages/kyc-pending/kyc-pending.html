@@ -1,0 +1,19 @@
+<div class="auth-container">
+  <div class="auth-card" style="max-width: 500px; text-align: center;">
+    <div class="auth-header">
+      <h2>Pending Approval</h2>
+      <p>Your documents are currently under review by our Admin team.</p>
+    </div>
+
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2" style="margin: 2rem auto; display: block; animation: pulse-glow 2s infinite;">
+      <circle cx="12" cy="12" r="10"></circle>
+      <polyline points="12 6 12 12 16 14"></polyline>
+    </svg>
+
+    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+      You will be granted access to the Dashboard once your details have been fully verified. Please check back later.
+    </p>
+
+    <button class="submit-btn" (click)="checkStatus()">Refresh Status</button>
+  </div>
+</div>

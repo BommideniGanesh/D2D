@@ -1,0 +1,56 @@
+<div class="dashboard">
+  <div class="section-header" style="margin-top: 24px;">
+    <h2 class="section-title">KYC Review Dashboard</h2>
+  </div>
+
+  <div class="error-banner" *ngIf="error" style="margin-bottom: 24px;">
+    {{ error }}
+  </div>
+
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Name / Location</th>
+          <th>Phone</th>
+          <th>Submitted Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let kyc of kycList">
+          <td><span class="id-badge">{{ kyc.username }}</span></td>
+          <td>
+            <div class="name-cell">{{ kyc.first_name }} {{ kyc.last_name }}</div>
+            <div class="desc-cell">{{ kyc.city }}, {{ kyc.state }} {{ kyc.zipcode }}</div>
+          </td>
+          <td>{{ kyc.phone }}</td>
+          <td>{{ kyc.date }}</td>
+          <td>
+            <span class="badge" [class.badge-pending]="kyc.status!=='Approved'" [class.badge-approved]="kyc.status==='Approved'">
+              {{ kyc.status }}
+            </span>
+          </td>
+          <td>
+            <button class="action-btn view-btn" (click)="viewDocument(kyc.id)" *ngIf="kyc.document_path">View ID</button>
+            <button class="action-btn approve-btn" *ngIf="kyc.status === 'Submitted'" (click)="approveKyc(kyc.id)">Approve</button>
+          </td>
+        </tr>
+        <tr *ngIf="kycList.length === 0 && !error">
+          <td colspan="6" style="text-align: center; padding: 2rem;">No KYC submissions found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal for Document View -->
+<div class="modal-overlay" *ngIf="selectedDocumentUrl" (click)="closeDocument()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <button class="close-btn" (click)="closeDocument()">✕</button>
+    <h3>Document Preview</h3>
+    <img [src]="selectedDocumentUrl" alt="KYC Document">
+  </div>
+</div>

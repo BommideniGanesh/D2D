@@ -1,0 +1,204 @@
+<div class="trade-history-container">
+  <div class="header-section">
+    <div class="title-group">
+      <h2>MetaTrader 5 History</h2>
+      <p>View your execution history and completed deals.</p>
+    </div>
+    <button (click)="fetchHistory(); fetchPositions(); fetchAccountInfo()" [disabled]="loading" class="refresh-btn">
+      <span class="icon" *ngIf="!loading">↻</span>
+      <span class="icon spinner" *ngIf="loading">⏳</span>
+      <span>Refresh</span>
+    </button>
+  </div>
+
+  <div *ngIf="error" class="error-banner">{{ error }}</div>
+
+  <!-- Live Account Balance Summary -->
+  <div *ngIf="accountData" style="display:flex;flex-wrap:wrap;gap:0;margin-bottom:24px;background:var(--bg-card);border-radius:12px;border:1px solid var(--border-color);overflow:hidden;">
+    <div style="flex:1;min-width:140px;padding:16px 20px;border-right:1px solid var(--border-color);">
+      <div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Account Balance</div>
+      <div style="font-size:1.25rem;font-weight:700;color:var(--text-primary);font-family:monospace;">{{ accountData.Balance | number:'1.2-2' }} <span style="font-size:0.8rem;color:var(--text-secondary);">{{ accountData.Currency }}</span></div>
+    </div>
+    <div style="flex:1;min-width:140px;padding:16px 20px;border-right:1px solid var(--border-color);">
+      <div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Market Equity</div>
+      <div style="font-size:1.25rem;font-weight:700;color:var(--text-primary);font-family:monospace;">{{ accountData.Equity | number:'1.2-2' }} <span style="font-size:0.8rem;color:var(--text-secondary);">{{ accountData.Currency }}</span></div>
+    </div>
+    <div style="flex:1;min-width:140px;padding:16px 20px;border-right:1px solid var(--border-color);">
+      <div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Realized P&L</div>
+      <div style="font-size:1.25rem;font-weight:700;font-family:monospace;" [style.color]="totalRealizedProfit >= 0 ? '#10b981' : '#ef4444'">{{ totalRealizedProfit >= 0 ? '+' : '' }}{{ totalRealizedProfit | number:'1.2-2' }} <span style="font-size:0.8rem;color:var(--text-secondary);">{{ accountData.Currency }}</span></div>
+    </div>
+    <div style="flex:1;min-width:140px;padding:16px 20px;">
+      <div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Floating P&L</div>
+      <div style="font-size:1.25rem;font-weight:700;font-family:monospace;" [style.color]="totalFloatingPnl >= 0 ? '#10b981' : '#ef4444'">{{ totalFloatingPnl >= 0 ? '+' : '' }}{{ totalFloatingPnl | number:'1.2-2' }} <span style="font-size:0.8rem;color:var(--text-secondary);">{{ accountData.Currency }}</span></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       TAB NAVIGATION
+  ════════════════════════════════════════════════ -->
+  <div class="th-tabs">
+    <button class="th-tab" [class.active]="activeTab === 'positions'" (click)="setTab('positions')">
+      Live Open Positions
+      <span class="pos-count-badge" *ngIf="positions.length > 0">{{ positions.length }}</span>
+    </button>
+    <button class="th-tab" [class.active]="activeTab === 'history'" (click)="setTab('history')">
+      Past Orders (History)
+    </button>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       OPEN POSITIONS TAB
+  ════════════════════════════════════════════════ -->
+  <div class="section-card" *ngIf="activeTab === 'positions'" style="margin-bottom:24px;">
+    <div class="section-card__header">
+      <div class="section-title-group">
+        <span class="section-dot" [class.pulsing]="positions.length > 0"></span>
+        <h3 class="section-title">Open Positions</h3>
+        <span class="pos-count-badge" *ngIf="positions.length > 0">{{ positions.length }}</span>
+      </div>
+      <span class="auto-refresh-label">Auto-refreshes every 10s</span>
+    </div>
+
+    <!-- Close result message -->
+    <div class="close-msg close-msg--success" *ngIf="closeMessage && closeSuccess">{{ closeMessage }}</div>
+    <div class="close-msg close-msg--error"   *ngIf="closeMessage && !closeSuccess">{{ closeMessage }}</div>
+
+    <!-- Loading -->
+    <div class="pos-state" *ngIf="positionsLoading && positions.length === 0">
+      <span>⏳</span><span>Loading positions…</span>
+    </div>
+
+    <!-- Empty -->
+    <div class="pos-state pos-state--empty" *ngIf="!positionsLoading && positions.length === 0">
+      <span>📭</span><span>No open positions</span>
+    </div>
+
+    <!-- Positions Table -->
+    <div *ngIf="positions.length > 0" class="data-table-container" style="border:none;box-shadow:none;">
+      <div class="table-header pos-header">
+        <div class="col time-col">Opened</div>
+        <div class="col ticket-col">Ticket</div>
+        <div class="col symbol-col">Symbol</div>
+        <div class="col type-col">Type</div>
+        <div class="col volume-col">Volume</div>
+        <div class="col price-col">Open Price</div>
+        <div class="col price-col">Current</div>
+        <div class="col profit-col">P&L</div>
+        <div class="col action-col">Action</div>
+      </div>
+
+      <div class="table-body">
+        <div *ngFor="let pos of positions" class="table-row pos-row">
+
+          <div class="col time-col truncate">
+            {{ pos.time * 1000 | date:'MMM d, HH:mm':'America/Chicago' }}
+          </div>
+
+          <div class="col ticket-col mono text-subtle">#{{ pos.ticket }}</div>
+
+          <div class="col symbol-col flex-col">
+            <span class="fw-bold">{{ pos.symbol }}</span>
+          </div>
+
+          <div class="col type-col center">
+            <span class="badge" [ngClass]="pos.type === 0 ? 'badge-buy' : 'badge-sell'">
+              {{ pos.type_label }}
+            </span>
+          </div>
+
+          <div class="col volume-col right fw-medium">
+            {{ pos.volume | number:'1.2-2' }}
+          </div>
+
+          <div class="col price-col right mono text-subtle">
+            {{ pos.price_open | number:'1.5-5' }}
+          </div>
+
+          <div class="col price-col right mono text-subtle">
+            {{ pos.price_current | number:'1.5-5' }}
+          </div>
+
+          <div class="col profit-col right fw-bold"
+            [ngClass]="pos.profit > 0 ? 'text-profit' : (pos.profit < 0 ? 'text-loss' : 'text-neutral')">
+            {{ pos.profit >= 0 ? '+' : '' }}{{ pos.profit | number:'1.2-2' }}
+          </div>
+
+          <div class="col action-col center">
+            <button
+              class="close-btn"
+              (click)="closePosition(pos.ticket)"
+              [disabled]="closingTicket === pos.ticket"
+              [title]="'Close position #' + pos.ticket"
+            >
+              <span *ngIf="closingTicket !== pos.ticket">✕ Close</span>
+              <span *ngIf="closingTicket === pos.ticket" class="closing-text">Closing…</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       DEAL HISTORY TAB
+  ════════════════════════════════════════════════ -->
+  <div class="data-table-container" *ngIf="activeTab === 'history'">
+    <div class="table-header">
+      <div class="col time-col">Time</div>
+      <div class="col ticket-col">Ticket</div>
+      <div class="col symbol-col">Symbol</div>
+      <div class="col type-col">Type</div>
+      <div class="col volume-col">Volume</div>
+      <div class="col price-col">Price</div>
+      <div class="col profit-col">Profit</div>
+    </div>
+
+    <div *ngIf="loading" class="state-container loading-state">
+      <span class="spinner-large">⏳</span>
+      <p>Syncing with Broker...</p>
+    </div>
+
+    <div *ngIf="!loading && trades.length === 0 && !error" class="state-container empty-state">
+      <span class="empty-icon">📊</span>
+      <p>No trading history found.</p>
+    </div>
+
+    <div *ngIf="!loading && trades.length > 0" class="table-body custom-scrollbar">
+      <div *ngFor="let trade of trades" class="table-row">
+
+        <div class="col time-col truncate" [title]="trade.time * 1000 | date:'short':'America/Chicago'">
+          {{ trade.time * 1000 | date:'MMM d, HH:mm':'America/Chicago' }}
+        </div>
+
+        <div class="col ticket-col mono text-subtle">#{{ trade.ticket }}</div>
+
+        <div class="col symbol-col flex-col">
+          <span class="fw-bold">{{ trade.symbol || 'Balance' }}</span>
+          <span class="sub-label" *ngIf="trade.symbol">{{ getEntryString(trade.entry) }}</span>
+        </div>
+
+        <div class="col type-col center">
+          <span class="badge"
+            [ngClass]="{'badge-buy': trade.type === 0, 'badge-sell': trade.type === 1, 'badge-other': trade.type > 1}">
+            {{ getTypeString(trade.type) }}
+          </span>
+        </div>
+
+        <div class="col volume-col right fw-medium">
+          {{ trade.volume > 0 ? (trade.volume | number:'1.2-2') : '-' }}
+        </div>
+
+        <div class="col price-col right mono text-subtle">
+          {{ trade.price > 0 ? (trade.price | number:'1.5-5') : '-' }}
+        </div>
+
+        <div class="col profit-col right fw-bold"
+          [ngClass]="trade.profit > 0 ? 'text-profit' : (trade.profit < 0 ? 'text-loss' : 'text-neutral')">
+          {{ trade.profit > 0 ? '+' : '' }}{{ trade.profit | number:'1.2-2' }}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

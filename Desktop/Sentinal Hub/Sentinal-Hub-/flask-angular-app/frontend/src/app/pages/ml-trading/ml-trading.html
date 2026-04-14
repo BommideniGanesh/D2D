@@ -1,0 +1,171 @@
+<div class="ml-trading-container">
+  <div class="page-header">
+    <h2>Trading Assistant</h2>
+    <p>Predictive Machine Learning models</p>
+  </div>
+
+  <!-- Display currently selected ticker from Market Analysis -->
+  <div class="ticker-selector"
+    style="background: rgba(99, 102, 241, 0.1); padding: 16px; border-radius: 8px; border: 1px solid rgba(99, 102, 241, 0.2); display: inline-flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+    <span style="color: var(--text-secondary); font-weight: 500;">Currently Analyzing:</span>
+    <span style="font-size: 1.5rem; font-weight: 700; color: var(--accent-primary);">{{ ticker }}</span>
+    <span *ngIf="isLoading" class="loading-spinner"
+      style="border-top-color: var(--accent-primary); width: 16px; height: 16px;"></span>
+  </div>
+
+  @if (false) {
+  <!-- Live Account Balance Strip (hidden) -->
+  <div *ngIf="accountData"
+    style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; background: var(--bg-card); border-radius: 10px; border: 1px solid var(--border-color); padding: 14px 20px; align-items: center;">
+    <div style="flex: 1; min-width: 120px;">
+      <div
+        style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
+        Wallet Balance</div>
+      <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); font-family: monospace;">{{
+        accountData.Balance | number:'1.2-2' }} <span style="font-size: 0.85rem; color: var(--text-secondary)">{{
+          accountData.Currency }}</span></div>
+    </div>
+    <div style="width: 1px; background: var(--border-color); height: 36px;"></div>
+    <div style="flex: 1; min-width: 120px;">
+      <div
+        style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
+        Market Equity</div>
+      <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); font-family: monospace;">{{
+        accountData.Equity | number:'1.2-2' }} <span style="font-size: 0.85rem; color: var(--text-secondary)">{{
+          accountData.Currency }}</span></div>
+    </div>
+    <div style="width: 1px; background: var(--border-color); height: 36px;"></div>
+    <div style="flex: 1; min-width: 120px;">
+      <div
+        style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
+        Floating Profit</div>
+      <div style="font-size: 1.2rem; font-weight: 700; font-family: monospace;"
+        [style.color]="accountData.Profit >= 0 ? '#10b981' : '#ef4444'">{{ accountData.Profit >= 0 ? '+' : '' }}{{
+        accountData.Profit | number:'1.2-2' }} <span style="font-size: 0.85rem; color: var(--text-secondary)">{{
+          accountData.Currency }}</span></div>
+    </div>
+    <button (click)="fetchAccountInfo()" [disabled]="isRefreshingBalance"
+      style="margin-left: auto; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+      <span *ngIf="isRefreshingBalance" class="loading-spinner"
+        style="width: 12px; height: 12px; border-top-color: var(--accent-primary);"></span>
+      <span *ngIf="!isRefreshingBalance">↻</span>
+      Refresh Balance
+    </button>
+  </div>
+  }
+
+  <div class="error-banner" *ngIf="error"
+    style="margin-bottom: 24px; padding: 16px; background-color: #fee2e2; color: #991b1b; border-radius: 8px;">
+    {{ error }}
+  </div>
+
+  <div class="models-grid" *ngIf="predictionData">
+    <!-- News Model -->
+    <div class="model-card">
+      <div class="model-header">
+        <h3>News Sentiment Model (NLP)</h3>
+        <span class="signal-badge" [ngClass]="'signal-' + predictionData.news_model.signal">
+          {{ predictionData.news_model.signal }}
+        </span>
+      </div>
+      <div class="model-stats">
+        <div class="stat-item">
+          <span class="stat-label">Model Confidence</span>
+          <span class="stat-value">{{ predictionData.news_model.confidence }}%</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Articles Analyzed</span>
+          <span class="stat-value">{{ predictionData.news_model.articles_analyzed }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Architecture</span>
+          <span class="stat-value" style="font-size: 0.9rem;">Data of Multi-Source</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Historical Model -->
+    <div class="model-card">
+      <div class="model-header">
+        <h3>Historical Prediction Model</h3>
+        <span class="signal-badge" [ngClass]="'signal-' + predictionData.historical_model.signal">
+          {{ predictionData.historical_model.signal }}
+        </span>
+      </div>
+      <div class="model-stats">
+        <div class="stat-item">
+          <span class="stat-label">Model Confidence</span>
+          <span class="stat-value">{{ predictionData.historical_model.confidence }}%</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Predicted Next Close</span>
+          <span class="stat-value" style="color: #4f46e5;">${{ predictionData.historical_model.predicted_close }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Architecture</span>
+          <span class="stat-value" style="font-size: 0.9rem;">Linear Regression</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       EXECUTE TRADE PANEL
+  ═══════════════════════════════════════════════ -->
+  <div class="exec-panel" *ngIf="predictionData">
+    <div class="exec-panel__header">
+      <span class="exec-icon">⚡</span>
+      <h3 class="exec-title">Execute Trade</h3>
+      <span class="exec-ticker">{{ ticker }}</span>
+    </div>
+
+    <div class="exec-body">
+      <!-- Lot size -->
+      <div class="exec-input-group">
+        <label class="exec-label" for="mlLotSize">Lot Size</label>
+        <input
+          id="mlLotSize"
+          type="number"
+          class="exec-input"
+          [(ngModel)]="volume"
+          min="0.01"
+          step="0.01"
+          placeholder="1.00"
+        />
+      </div>
+
+      <!-- BUY / SELL buttons -->
+      <div class="exec-actions">
+        <button
+          id="mlBuyBtn"
+          class="exec-btn exec-btn--buy"
+          (click)="executeTrade('BUY')"
+          [disabled]="isExecuting || !ticker"
+        >
+          <span *ngIf="!(isExecuting && currentAction === 'BUY')">▲ BUY</span>
+          <span *ngIf="isExecuting && currentAction === 'BUY'" class="loading-spinner"></span>
+          <span *ngIf="isExecuting && currentAction === 'BUY'">Sending…</span>
+        </button>
+
+        <button
+          id="mlSellBtn"
+          class="exec-btn exec-btn--sell"
+          (click)="executeTrade('SELL')"
+          [disabled]="isExecuting || !ticker"
+        >
+          <span *ngIf="!(isExecuting && currentAction === 'SELL')">▼ SELL</span>
+          <span *ngIf="isExecuting && currentAction === 'SELL'" class="loading-spinner"></span>
+          <span *ngIf="isExecuting && currentAction === 'SELL'">Sending…</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Result message -->
+    <div class="exec-feedback exec-feedback--success" *ngIf="tradeStatus && !tradeStatus.includes('failed') && !tradeStatus.includes('Error') && !tradeStatus.includes('Failed')">
+      ✅ {{ tradeStatus }}
+    </div>
+    <div class="exec-feedback exec-feedback--error" *ngIf="tradeStatus && (tradeStatus.includes('failed') || tradeStatus.includes('Error') || tradeStatus.includes('Failed'))">
+      ❌ {{ tradeStatus }}
+    </div>
+  </div>
+

@@ -1,0 +1,53 @@
+@import url('../kyc-details/kyc-details.css');
+
+.upload-zone {
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--bg-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.upload-zone:hover {
+  border-color: var(--accent-primary);
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.upload-placeholder svg {
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.upload-placeholder p {
+  color: var(--text-primary);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.upload-placeholder span {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.file-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.file-preview img {
+  max-width: 100%;
+  max-height: 250px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-card);
+}
+
+.file-preview p {
+  color: var(--accent-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}

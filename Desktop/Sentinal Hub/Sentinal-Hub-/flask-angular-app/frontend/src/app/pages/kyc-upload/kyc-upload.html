@@ -1,0 +1,33 @@
+<div class="auth-container">
+  <div class="auth-card" style="max-width: 500px;">
+    <div class="auth-header">
+      <h2>Upload Driver's License</h2>
+      <p>Please provide a clear picture of your ID.</p>
+    </div>
+
+    <div class="error-banner" *ngIf="error">{{ error }}</div>
+
+    <div class="upload-zone" (click)="fileInput.click()">
+      <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none">
+      
+      <div *ngIf="!filePreview" class="upload-placeholder">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        <p>Click to browse files or drag and drop</p>
+        <span>Max size: 5MB</span>
+      </div>
+
+      <div *ngIf="filePreview" class="file-preview">
+        <img [src]="filePreview" alt="Document Preview">
+        <p>Click to change file</p>
+      </div>
+    </div>
+
+    <button class="submit-btn" [disabled]="!selectedFile || isUploading" (click)="onUpload()">
+      {{ isUploading ? 'Uploading...' : 'Submit Document' }}
+    </button>
+  </div>
+</div>

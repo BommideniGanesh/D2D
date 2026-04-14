@@ -1,0 +1,63 @@
+<div class="settings-container">
+  <div class="card">
+    <h2 style="color: #1f2937; margin-bottom: 0.5rem; border-bottom: 2px solid #f3f4f6; padding-bottom: 1rem;">Broker Configuration (MetaTrader 5)</h2>
+    <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 2rem;">Link your MetaTrader Terminal securely to enable autonomous algorithmic trading execution.</p>
+
+    <div class="form-group">
+      <label>Login ID (Account Number)</label>
+      <input type="number" class="form-control" [(ngModel)]="loginId" placeholder="e.g. 5048836561">
+    </div>
+
+    <div class="form-group">
+      <label>Account Password</label>
+      <input type="password" class="form-control" [(ngModel)]="password" placeholder="••••••••">
+    </div>
+
+    <div class="form-group">
+      <label>Broker Server</label>
+      <input type="text" class="form-control" [(ngModel)]="serverName" placeholder="e.g. MetaQuotes-Demo">
+    </div>
+
+    <div style="margin-top: 2rem; display: flex; align-items: center;">
+      <button class="btn btn-primary" (click)="onSave()" [disabled]="isLoading || !loginId || !password || !serverName">
+        {{ isLoading ? 'Saving...' : 'Save Configuration' }}
+      </button>
+
+      <button class="btn btn-secondary" (click)="onTestConnection()" [disabled]="isTesting || !loginId">
+        {{ isTesting ? 'Connecting Frame...' : 'Test MT5 Connection' }}
+      </button>
+    </div>
+
+    <div *ngIf="saveMessage" style="margin-top: 1rem; font-weight: 500; font-size: 0.9rem;" 
+         [style.color]="saveMessage.includes('✅') ? '#059669' : '#dc2626'">
+      {{ saveMessage }}
+    </div>
+
+    <!-- Connection Status Block -->
+    <div *ngIf="connectionStatus !== 'none'" class="status-box" [ngClass]="connectionStatus === 'success' ? 'status-success' : 'status-error'">
+      <strong>{{ connectionStatus === 'success' ? '✅ Connected' : '❌ Failed' }}:</strong> {{ connectionMessage }}
+      
+      <!-- Live Account Variables Dump -->
+      <div class="account-info" *ngIf="accountData">
+        <div class="info-row">
+          <span class="info-label">Active Broker:</span>
+          <span class="info-val">{{ accountData.Broker }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Wallet Balance:</span>
+          <span class="info-val">{{ accountData.Balance | number:'1.2-2' }} {{ accountData.Currency }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Market Equity:</span>
+          <span class="info-val">{{ accountData.Equity | number:'1.2-2' }} {{ accountData.Currency }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Floating Profit:</span>
+          <span class="info-val" [style.color]="accountData.Profit >= 0 ? '#059669' : '#dc2626'">
+            {{ accountData.Profit >= 0 ? '+' : '' }}{{ accountData.Profit | number:'1.2-2' }} {{ accountData.Currency }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
